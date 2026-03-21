@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NCK BScN Study Assistant</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#07090f;
+  --s1:#0e1118;
+  --s2:#141824;
+  --s3:#1c2235;
+  --s4:#232b40;
+  --b1:rgba(90,130,255,0.10);
+  --b2:rgba(90,130,255,0.20);
+  --b3:rgba(90,130,255,0.30);
+  --acc:#5a82ff;
+  --acc2:#7fa4ff;
+  --acc-d:rgba(90,130,255,0.14);
+  --acc-g:rgba(90,130,255,0.28);
+  --grn:#34d885;
+  --grn-d:rgba(52,216,133,0.13);
+  --amb:#f5a623;
+  --amb-d:rgba(245,166,35,0.13);
+  --red:#ff6b7a;
+  --red-d:rgba(255,107,122,0.13);
+  --pur:#c084fc;
+  --pur-d:rgba(192,132,252,0.13);
+  --txt:#dde4f5;
+  --txt2:#8896b8;
+  --txt3:#4a5572;
+  --fnt:'Plus Jakarta Sans',sans-serif;
+  --mono:'JetBrains Mono',monospace;
+  --r:10px;--r2:14px;--r3:18px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--fnt);background:var(--bg);color:var(--txt);min-height:100vh;overflow-x:hidden}
+
+/* grid bg */
+body::before{
+  content:'';position:fixed;inset:0;
+  background-image:linear-gradient(rgba(90,130,255,0.035) 1px,transparent 1px),linear-gradient(90deg,rgba(90,130,255,0.035) 1px,transparent 1px);
+  background-size:44px 44px;pointer-events:none;z-index:0;
+}
+/* glow orb */
+body::after{
+  content:'';position:fixed;top:-200px;right:-100px;
+  width:600px;height:600px;border-radius:50%;
+  background:radial-gradient(circle,rgba(90,130,255,0.06) 0%,transparent 70%);
+  pointer-events:none;z-index:0;
+}
+
+.app{display:flex;min-height:100vh;position:relative;z-index:1}
+
+/* ═══ SIDEBAR ═══ */
+.sidebar{
+  width:272px;flex-shrink:0;
+  background:var(--s1);
+  border-right:1px solid var(--b1);
+  display:flex;flex-direction:column;
+  position:fixed;top:0;left:0;bottom:0;
+  overflow-y:auto;z-index:100;
+  transition:transform .3s cubic-bezier(.4,0,.2,1);
+}
+.sidebar::-webkit-scrollbar{width:4px}
+.sidebar::-webkit-scrollbar-track{background:transparent}
+.sidebar::-webkit-scrollbar-thumb{background:var(--s4);border-radius:99px}
+
+.logo-area{padding:22px 20px 18px;border-bottom:1px solid var(--b1)}
+.logo{display:flex;align-items:center;gap:11px}
+.logo-mark{
+  width:36px;height:36px;border-radius:10px;
+  background:linear-gradient(135deg,var(--acc) 0%,#8b5cf6 100%);
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;flex-shrink:0;
+  box-shadow:0 0 20px rgba(90,130,255,0.35);
+}
+.logo-name{font-size:15px;font-weight:700;letter-spacing:-.3px;line-height:1.2}
+.logo-sub{font-size:10px;color:var(--txt3);font-family:var(--mono);margin-top:2px;letter-spacing:.5px}
+
+.nav-section{padding:18px 14px 6px}
+.nav-label{font-size:10px;font-weight:700;letter-spacing:1.4px;color:var(--txt3);text-transform:uppercase;padding:0 6px;margin-bottom:6px;font-family:var(--mono)}
+.nav-item{
+  display:flex;align-items:center;gap:9px;
+  padding:8px 10px;border-radius:9px;
+  font-size:13px;color:var(--txt2);
+  cursor:pointer;transition:all .15s;
+  border:1px solid transparent;margin-bottom:1px;
+  user-select:none;
+}
+.nav-item:hover{background:var(--s3);color:var(--txt);border-color:var(--b1)}
+.nav-item.active{background:var(--acc-d);color:var(--acc2);border-color:var(--b2);font-weight:500}
+.nav-item .ni-icon{font-size:14px;width:18px;text-align:center;flex-shrink:0}
+.nav-item .ni-count{margin-left:auto;font-size:10px;font-family:var(--mono);color:var(--txt3);background:var(--s4);border-radius:99px;padding:1px 7px}
+.nav-item.active .ni-count{color:var(--acc);background:var(--acc-d)}
+
+.sidebar-footer{margin-top:auto;padding:16px 20px;border-top:1px solid var(--b1)}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.stat-box{background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);padding:10px 12px;text-align:center}
+.stat-val{font-size:18px;font-weight:700;color:var(--acc);font-family:var(--mono);line-height:1}
+.stat-key{font-size:10px;color:var(--txt3);margin-top:3px}
+
+/* ═══ MAIN ═══ */
+.main{margin-left:272px;flex:1;display:flex;flex-direction:column;min-height:100vh}
+
+/* ═══ TOPBAR ═══ */
+.topbar{
+  height:62px;display:flex;align-items:center;gap:14px;
+  padding:0 28px;
+  background:rgba(14,17,24,0.85);backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--b1);
+  position:sticky;top:0;z-index:50;
+}
+.menu-btn{display:none;background:none;border:none;color:var(--txt2);font-size:22px;cursor:pointer;padding:4px;line-height:1}
+.topbar-title{font-size:15px;font-weight:600;color:var(--txt)}
+.topbar-sub{font-size:12px;color:var(--txt3);margin-left:4px}
+
+/* search */
+.search-wrap{flex:1;display:flex;align-items:center;gap:10px;max-width:560px;margin-left:auto}
+.search-field{
+  flex:1;display:flex;align-items:center;gap:9px;
+  background:var(--s2);border:1px solid var(--b2);
+  border-radius:var(--r);padding:0 13px;
+  transition:border-color .2s,box-shadow .2s;
+}
+.search-field:focus-within{border-color:var(--acc);box-shadow:0 0 0 3px var(--acc-g)}
+.search-ico{color:var(--txt3);font-size:13px;flex-shrink:0}
+.search-inp{
+  flex:1;background:none;border:none;outline:none;
+  color:var(--txt);font-family:var(--fnt);font-size:13px;padding:10px 0;
+}
+.search-inp::placeholder{color:var(--txt3)}
+.search-kbd{font-family:var(--mono);font-size:10px;color:var(--txt3);background:var(--s3);border:1px solid var(--b2);border-radius:4px;padding:2px 6px}
+.gen-btn{
+  display:flex;align-items:center;gap:7px;
+  background:var(--acc);color:#fff;
+  font-family:var(--fnt);font-size:13px;font-weight:600;
+  padding:10px 18px;border-radius:var(--r);
+  border:none;cursor:pointer;flex-shrink:0;
+  transition:background .15s,transform .1s,opacity .15s;
+  box-shadow:0 0 20px var(--acc-g);
+}
+.gen-btn:hover{background:#4a72ef}
+.gen-btn:active{transform:scale(.98)}
+.gen-btn:disabled{opacity:.45;cursor:not-allowed;box-shadow:none}
+
+/* ═══ CONTENT ═══ */
+.content{flex:1;padding:28px 28px 60px}
+
+/* ═══ VIEW HEADERS ═══ */
+.view-hdr{margin-bottom:22px}
+.view-hdr h1{font-size:22px;font-weight:700;letter-spacing:-.4px;margin-bottom:4px}
+.view-hdr p{font-size:13px;color:var(--txt2);line-height:1.6}
+
+/* ═══ TOPIC CARDS GRID (home) ═══ */
+.topics-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;margin-bottom:32px}
+.topic-card{
+  background:var(--s1);border:1px solid var(--b1);border-radius:var(--r2);
+  padding:18px 20px;cursor:pointer;
+  transition:all .2s cubic-bezier(.4,0,.2,1);
+  position:relative;overflow:hidden;
+}
+.topic-card::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,var(--acc-d),transparent);
+  opacity:0;transition:opacity .2s;
+}
+.topic-card:hover{border-color:var(--b3);transform:translateY(-2px);box-shadow:0 8px 32px rgba(90,130,255,.12)}
+.topic-card:hover::before{opacity:1}
+.tc-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;position:relative}
+.tc-icon{
+  width:40px;height:40px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;flex-shrink:0;
+}
+.tc-count{font-size:11px;font-family:var(--mono);color:var(--txt3);margin-top:4px}
+.tc-name{font-size:14px;font-weight:600;margin-bottom:3px;position:relative}
+.tc-desc{font-size:11.5px;color:var(--txt2);line-height:1.5;position:relative}
+.tc-arrow{color:var(--txt3);font-size:16px;position:relative;transition:transform .2s}
+.topic-card:hover .tc-arrow{transform:translateX(3px);color:var(--acc2)}
+
+/* ═══ QUIZ VIEW ═══ */
+.quiz-header{
+  display:flex;align-items:center;gap:14px;
+  padding:16px 20px;
+  background:var(--s1);border:1px solid var(--b1);border-radius:var(--r2);
+  margin-bottom:20px;
+}
+.quiz-topic-icon{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.quiz-topic-name{font-size:16px;font-weight:700;margin-bottom:2px}
+.quiz-topic-meta{font-size:12px;color:var(--txt2)}
+.quiz-actions{display:flex;gap:8px;margin-left:auto;flex-wrap:wrap}
+.btn-sm{
+  padding:7px 14px;border-radius:8px;font-size:12px;font-weight:500;
+  border:1px solid var(--b2);background:var(--s2);color:var(--txt2);
+  cursor:pointer;transition:all .15s;font-family:var(--fnt);
+}
+.btn-sm:hover{background:var(--s3);color:var(--txt);border-color:var(--b3)}
+.btn-sm.primary{background:var(--acc);border-color:var(--acc);color:#fff}
+.btn-sm.primary:hover{background:#4a72ef}
+
+/* progress */
+.progress-area{margin-bottom:16px}
+.progress-bar-wrap{height:5px;background:var(--s3);border-radius:99px;overflow:hidden;margin-bottom:8px}
+.progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--acc),var(--pur));border-radius:99px;transition:width .4s ease}
+.progress-stats{display:flex;justify-content:space-between;font-size:11px;color:var(--txt3);font-family:var(--mono)}
+
+/* mode tabs */
+.mode-tabs{display:flex;gap:6px;margin-bottom:20px}
+.mode-tab{
+  padding:7px 14px;border-radius:8px;font-size:12px;font-weight:500;
+  border:1px solid var(--b1);background:var(--s2);color:var(--txt3);
+  cursor:pointer;transition:all .15s;
+}
+.mode-tab:hover{color:var(--txt2);border-color:var(--b2)}
+.mode-tab.on{background:var(--acc-d);border-color:var(--b2);color:var(--acc2)}
+
+/* question card */
+.q-wrap{animation:slideUp .25s ease both}
+@keyframes slideUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-card{
+  background:var(--s1);border:1px solid var(--b1);border-radius:var(--r2);
+  overflow:hidden;margin-bottom:14px;
+}
+.q-card-top{padding:20px 22px 16px}
+.q-num-row{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.q-num{font-size:11px;font-family:var(--mono);color:var(--txt3);background:var(--s3);border-radius:99px;padding:3px 10px}
+.q-source-badge{font-size:10px;color:var(--txt3);background:var(--s3);border-radius:99px;padding:3px 8px}
+.q-text{font-size:15px;font-weight:500;line-height:1.65;color:var(--txt)}
+
+/* options */
+.options-grid{display:flex;flex-direction:column;gap:8px;margin-top:16px}
+.opt-btn{
+  display:flex;align-items:flex-start;gap:12px;
+  padding:12px 15px;border-radius:var(--r);
+  border:1px solid var(--b2);background:var(--s2);
+  cursor:pointer;text-align:left;font-family:var(--fnt);
+  transition:all .15s;color:var(--txt2);font-size:13px;line-height:1.5;
+}
+.opt-btn:hover:not(:disabled){border-color:var(--acc);background:var(--acc-d);color:var(--txt)}
+.opt-btn:disabled{cursor:not-allowed}
+.opt-btn.correct{background:var(--grn-d);border-color:rgba(52,216,133,.35);color:var(--grn)}
+.opt-btn.wrong{background:var(--red-d);border-color:rgba(255,107,122,.35);color:var(--red)}
+.opt-btn.reveal{background:var(--grn-d);border-color:rgba(52,216,133,.35);color:var(--grn)}
+.opt-ltr{font-family:var(--mono);font-size:11px;font-weight:600;width:22px;height:22px;border-radius:6px;background:var(--s4);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;transition:background .15s}
+.opt-btn.correct .opt-ltr{background:rgba(52,216,133,.2)}
+.opt-btn.wrong .opt-ltr{background:rgba(255,107,122,.2)}
+.opt-btn.reveal .opt-ltr{background:rgba(52,216,133,.2)}
+
+/* explanation */
+.explanation{
+  padding:13px 15px;border-radius:var(--r);
+  margin-top:12px;font-size:13px;line-height:1.7;
+}
+.explanation.ok{background:var(--grn-d);border:1px solid rgba(52,216,133,.2);color:var(--txt)}
+.explanation.no{background:var(--amb-d);border:1px solid rgba(245,166,35,.2);color:var(--txt)}
+.explanation .ex-label{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;font-family:var(--mono);margin-bottom:5px}
+.explanation.ok .ex-label{color:var(--grn)}
+.explanation.no .ex-label{color:var(--amb)}
+
+/* q nav */
+.q-nav{display:flex;gap:10px;justify-content:space-between;align-items:center;padding:14px 22px;border-top:1px solid var(--b1)}
+.q-nav-left{display:flex;gap:8px}
+
+/* score screen */
+.score-screen{
+  background:var(--s1);border:1px solid var(--b1);border-radius:var(--r2);
+  padding:48px 32px;text-align:center;animation:slideUp .3s ease;
+}
+.score-ring{
+  width:110px;height:110px;border-radius:50%;
+  margin:0 auto 20px;display:flex;align-items:center;justify-content:center;
+  position:relative;
+}
+.score-ring-bg{
+  position:absolute;inset:0;border-radius:50%;
+  background:conic-gradient(var(--acc) var(--pct),var(--s3) 0);
+  transition:background 1s ease;
+}
+.score-ring-inner{
+  position:relative;width:86px;height:86px;border-radius:50%;
+  background:var(--s1);display:flex;align-items:center;justify-content:center;
+  flex-direction:column;
+}
+.score-pct{font-size:24px;font-weight:800;font-family:var(--mono);color:var(--acc)}
+.score-label{font-size:9px;color:var(--txt3);font-family:var(--mono);letter-spacing:.5px}
+.score-msg{font-size:18px;font-weight:700;margin-bottom:8px}
+.score-sub{font-size:13px;color:var(--txt2);margin-bottom:24px}
+.score-pills{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:28px}
+.score-pill{padding:7px 18px;border-radius:99px;font-size:13px;font-weight:500}
+.score-pill.g{background:var(--grn-d);color:var(--grn);border:1px solid rgba(52,216,133,.2)}
+.score-pill.r{background:var(--red-d);color:var(--red);border:1px solid rgba(255,107,122,.2)}
+.score-pill.n{background:var(--s2);color:var(--txt2);border:1px solid var(--b1)}
+.score-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+
+/* ═══ RAG PANEL ═══ */
+.rag-panel{
+  background:var(--s1);border:1px solid var(--b1);border-radius:var(--r2);
+  margin-bottom:16px;overflow:hidden;
+  animation:slideUp .3s ease both;
+}
+.rag-panel:nth-child(2){animation-delay:.06s}
+.rag-panel:nth-child(3){animation-delay:.12s}
+.rag-panel:nth-child(4){animation-delay:.18s}
+.rag-panel:nth-child(5){animation-delay:.24s}
+.panel-hdr{
+  display:flex;align-items:center;gap:12px;
+  padding:13px 18px;background:var(--s2);
+  border-bottom:1px solid var(--b1);
+}
+.panel-ico{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.panel-title{font-size:13px;font-weight:600}
+.panel-badge{margin-left:auto;font-size:10px;font-family:var(--mono);color:var(--txt3);background:var(--s3);border:1px solid var(--b1);border-radius:99px;padding:3px 9px}
+.panel-body{padding:18px}
+
+/* concept */
+.concept-box{
+  background:var(--s2);border-left:3px solid var(--acc);border-radius:0 var(--r) var(--r) 0;
+  padding:13px 16px;font-size:13px;line-height:1.75;color:var(--txt);margin-bottom:14px;
+}
+.facts-lbl{font-size:10px;font-weight:700;letter-spacing:1.2px;color:var(--txt3);text-transform:uppercase;font-family:var(--mono);margin-bottom:8px}
+.fact-row{display:flex;gap:10px;margin-bottom:7px;font-size:13px;line-height:1.6;color:var(--txt2)}
+.fact-dot{width:6px;height:6px;border-radius:50%;background:var(--acc);margin-top:7px;flex-shrink:0}
+
+/* alt questions */
+.alt-q{border:1px solid var(--b1);border-radius:var(--r);margin-bottom:8px;overflow:hidden}
+.alt-q-head{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;cursor:pointer;transition:background .15s}
+.alt-q-head:hover{background:var(--s2)}
+.alt-q-num{font-family:var(--mono);font-size:10px;color:var(--txt3);padding-top:3px;flex-shrink:0}
+.alt-q-meta{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:5px}
+.diff-badge{font-size:10px;font-weight:600;border-radius:99px;padding:2px 8px}
+.diff-easy{background:var(--grn-d);color:var(--grn)}
+.diff-medium{background:var(--amb-d);color:var(--amb)}
+.diff-hard{background:var(--red-d);color:var(--red)}
+.type-badge{font-size:10px;color:var(--txt3);background:var(--s3);border:1px solid var(--b1);border-radius:99px;padding:2px 8px}
+.alt-q-text{font-size:13px;font-weight:500;color:var(--txt);line-height:1.5}
+.alt-expand{margin-left:auto;color:var(--txt3);font-size:11px;transition:transform .2s;flex-shrink:0;padding-top:3px}
+.alt-q.open .alt-expand{transform:rotate(180deg)}
+.alt-q-body{display:none;padding:0 14px 14px;background:var(--s2)}
+.alt-q.open .alt-q-body{display:block}
+.alt-answer{background:var(--grn-d);border:1px solid rgba(52,216,133,.18);border-radius:var(--r);padding:11px 13px;margin-top:2px}
+.alt-ans-lbl{font-size:10px;font-weight:700;letter-spacing:1px;color:var(--grn);font-family:var(--mono);margin-bottom:4px}
+.alt-ans-txt{font-size:13px;font-weight:500;color:var(--txt)}
+.alt-ans-exp{font-size:12px;color:var(--txt2);margin-top:4px;line-height:1.6}
+.try-btn{display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--acc);cursor:pointer;margin-top:9px;font-family:var(--mono);transition:opacity .15s}
+.try-btn:hover{opacity:.7}
+
+/* evidence */
+.ev-item{padding:12px 0;border-bottom:1px solid var(--b1)}
+.ev-item:last-child{border-bottom:none}
+.ev-meta{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:7px}
+.ev-src{font-size:10px;font-weight:700;font-family:var(--mono);color:var(--acc);background:var(--acc-d);border:1px solid rgba(90,130,255,.2);border-radius:99px;padding:2px 9px}
+.ev-sec{font-size:10px;color:var(--txt3);background:var(--s3);border-radius:99px;padding:2px 9px;border:1px solid var(--b1);max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ev-score{margin-left:auto;font-size:10px;font-family:var(--mono);color:var(--txt3)}
+.ev-score em{color:var(--amb);font-style:normal}
+.ev-quote{font-size:12.5px;color:var(--txt2);line-height:1.7;border-left:2px solid var(--acc-d);padding-left:11px;font-style:italic}
+
+/* related */
+.rel-wrap{display:flex;flex-wrap:wrap;gap:8px}
+.rel-chip{
+  padding:7px 14px;background:var(--s2);border:1px solid var(--b1);
+  border-radius:8px;font-size:12px;color:var(--txt2);cursor:pointer;transition:all .15s;
+}
+.rel-chip:hover{background:var(--acc-d);border-color:var(--b2);color:var(--acc2)}
+
+/* JSON */
+.json-toggle{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:11px;color:var(--txt3);cursor:pointer;font-family:var(--mono);
+  padding:5px 10px;border-radius:6px;border:1px solid var(--b1);background:var(--s2);
+  transition:all .15s;margin-top:6px;
+}
+.json-toggle:hover{color:var(--acc);border-color:var(--b2)}
+.json-box{
+  display:none;margin-top:10px;
+  background:#0a0d14;border:1px solid var(--b1);
+  border-radius:var(--r);padding:16px;
+  font-family:var(--mono);font-size:11px;line-height:1.7;
+  color:#6b7fa8;overflow-x:auto;white-space:pre;
+  max-height:280px;overflow-y:auto;
+}
+.json-box.open{display:block}
+
+/* loading */
+.loading-wrap{padding:16px 0}
+.ls{
+  display:flex;align-items:center;gap:14px;
+  padding:14px 18px;background:var(--s1);border:1px solid var(--b1);
+  border-radius:var(--r);margin-bottom:8px;
+  animation:breathe 1.4s ease-in-out infinite;
+}
+.ls.done{animation:none;border-color:rgba(52,216,133,.2);background:var(--grn-d)}
+.ls.done .ls-ico{color:var(--grn)}
+@keyframes breathe{0%,100%{opacity:1}50%{opacity:.5}}
+.ls-spinner{width:16px;height:16px;border-radius:50%;border:2px solid var(--b2);border-top-color:var(--acc);animation:spin .7s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ls-ico{font-size:15px;flex-shrink:0}
+.ls-text{font-size:13px;color:var(--txt2)}
+.ls-sub{font-size:11px;color:var(--txt3);margin-top:2px;font-family:var(--mono)}
+
+/* home welcome */
+.home-hero{
+  background:linear-gradient(135deg,var(--s1),var(--s2));
+  border:1px solid var(--b1);border-radius:var(--r2);
+  padding:28px 28px 24px;margin-bottom:24px;
+  position:relative;overflow:hidden;
+}
+.home-hero::before{
+  content:'📚';font-size:120px;position:absolute;right:-10px;top:-20px;
+  opacity:.06;line-height:1;pointer-events:none;
+}
+.home-hero-eyebrow{font-size:11px;font-family:var(--mono);color:var(--acc);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px}
+.home-hero h2{font-size:24px;font-weight:800;letter-spacing:-.5px;margin-bottom:8px;line-height:1.2}
+.home-hero p{font-size:13px;color:var(--txt2);max-width:480px;line-height:1.7}
+.hero-chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+.hero-chip{
+  padding:5px 13px;border-radius:99px;font-size:12px;
+  border:1px solid var(--b2);color:var(--txt2);background:var(--s3);
+  cursor:pointer;transition:all .15s;
+}
+.hero-chip:hover{border-color:var(--acc);color:var(--acc2);background:var(--acc-d)}
+
+/* overlay */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:90;backdrop-filter:blur(2px)}
+
+/* ─ responsive ─ */
+@media(max-width:900px){
+  .sidebar{transform:translateX(-100%)}
+  .sidebar.open{transform:translateX(0)}
+  .overlay{display:block;opacity:0;pointer-events:none;transition:opacity .3s}
+  .overlay.open{opacity:1;pointer-events:all}
+  .main{margin-left:0}
+  .menu-btn{display:block}
+  .content{padding:20px 16px 48px}
+  .topbar{padding:0 16px}
+  .topics-grid{grid-template-columns:1fr 1fr}
+  .search-kbd{display:none}
+}
+@media(max-width:540px){
+  .topics-grid{grid-template-columns:1fr}
+  .home-hero h2{font-size:20px}
+  .search-wrap{max-width:100%}
+  .topbar-title,.topbar-sub{display:none}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- ═══ SIDEBAR ═══ -->
+<nav class="sidebar" id="sidebar">
+  <div class="logo-area">
+    <div class="logo">
+      <div class="logo-mark">🩺</div>
+      <div>
+        <div class="logo-name">NCK Study AI</div>
+        <div class="logo-sub">BScN · RAG-Powered</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-label">Study Topics</div>
+    <div id="navItems"></div>
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="nav-label" style="margin-bottom:10px">Knowledge Base</div>
+    <div class="stat-grid">
+      <div class="stat-box"><div class="stat-val" id="statQ">147</div><div class="stat-key">Questions</div></div>
+      <div class="stat-box"><div class="stat-val">14</div><div class="stat-key">Topics</div></div>
+      <div class="stat-box"><div class="stat-val">150</div><div class="stat-key">KB Chunks</div></div>
+      <div class="stat-box"><div class="stat-val">3</div><div class="stat-key">Textbooks</div></div>
+    </div>
+  </div>
+</nav>
+
+<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+<!-- ═══ MAIN ═══ -->
+<main class="main">
+  <div class="topbar">
+    <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+    <span class="topbar-title" id="topbarTitle">Home</span>
+    <span class="topbar-sub" id="topbarSub"></span>
+    <div class="search-wrap">
+      <div class="search-field">
+        <span class="search-ico">🔍</span>
+        <input type="text" id="searchInp" class="search-inp" placeholder="Ask anything — hypertension, eclampsia, AVPU…" autocomplete="off"/>
+        <span class="search-kbd">⏎</span>
+      </div>
+      <button class="gen-btn" id="genBtn" onclick="runRAG()">Generate ↗</button>
+    </div>
+  </div>
+
+  <div class="content" id="content"></div>
+</main>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════════════════════
+const TOPICS_DATA = {"Obstetrics & Midwifery": [{"q": "Eclampsia is diagnosed when the patient presents with:", "opts": ["Oedema, convulsion, proteinuria", "Proteinuria, oedema, headache", "Proteinuria, low urine output, vomiting", "Oedema, polyuria, oedema"], "ans": 0, "exp": "Eclampsia = pre-eclampsia (hypertension + proteinuria + oedema) PLUS convulsions/seizures."}, {"q": "Mrs B (G1P0) at 37w5d has low back pain, abdominal pain and vaginal bleeding after a fall — soaked 2 pads in 4 hours. Most likely diagnosis?", "opts": ["Postpartum haemorrhage", "Placenta praevia", "Placental abruption", "Cord prolapse"], "ans": 2, "exp": "Placental abruption: painful vaginal bleeding after trauma, tender abdomen, dark red blood. Praevia is painless bright red bleeding."}, {"q": "Normal fetal heart rate at term is:", "opts": ["120–160 bpm", "120–140 bpm", "110–160 bpm", "110–140 bpm"], "ans": 0, "exp": "Normal FHR at term: 120–160 bpm. <110 = bradycardia, >160 = tachycardia."}, {"q": "Hegar's sign is a probable sign of pregnancy characterised by:", "opts": ["Softening of the cervix", "Periodic uterine tightening", "Colour change of the vagina from pink to violet", "Softening of the lower uterine segment"], "ans": 3, "exp": "Hegar's sign = softening and compressibility of the lower uterine segment (isthmus) at 6-8 weeks. Goodell's = cervical softening. Chadwick's = vaginal colour change."}, {"q": "The number of antenatal visits as per WHO recommendation is:", "opts": ["3", "2", "1", "4 (minimum 8 contacts)"], "ans": 3, "exp": "WHO 2016 guidelines recommend minimum 8 ANC contacts. Older guidelines recommended 4 focused ANC visits."}, {"q": "Cord care in a newborn should be done using:", "opts": ["Methylated spirit", "Chlorhexidine", "Normal saline", "Topical steroid"], "ans": 1, "exp": "WHO recommends 4% chlorhexidine solution/gel for cord care in low-resource settings. It significantly reduces neonatal mortality from cord infections."}, {"q": "Vaginal examination during second stage of labour is performed to:", "opts": ["Confirm full cervical dilatation", "Check presentation", "Rupture membranes", "Prepare for delivery"], "ans": 0, "exp": "Second stage begins at full (10cm) cervical dilatation. VE confirms this before pushing begins."}, {"q": "The skin changes during pregnancy due to:", "opts": ["Good diet", "Increased melanocyte activity", "Reduced vitamin intake", "Reduced intake of fluids"], "ans": 1, "exp": "Increased melanocyte-stimulating hormone (MSH) and oestrogen cause hyperpigmentation: linea nigra, melasma (chloasma), areolar darkening."}, {"q": "A woman at 32 weeks has headache, progressive lower limb oedema, BP 220/156 mmHg, and proteinuria. Most probable diagnosis?", "opts": ["Malaria in pregnancy", "UTI in pregnancy", "Preeclampsia", "Eclampsia"], "ans": 2, "exp": "Preeclampsia: BP ≥140/90 after 20 weeks + proteinuria ± oedema. No convulsions yet, so this is severe preeclampsia — not eclampsia."}, {"q": "The most common indication for primary caesarean section is:", "opts": ["Prolapsed cord", "Labour dystocia", "Diabetes", "Malpresentation"], "ans": 1, "exp": "Labour dystocia (failure to progress/CPD) accounts for ~30% of all primary caesarean deliveries."}, {"q": "Preventive measures of ophthalmia neonatorum include:", "opts": ["Systemic penicillin within 1 hour, isolation of baby", "Penicillin eye drops after birth, eye swab for C&S", "Treatment of vaginal discharges prenatally, 3% tetracycline eye ointment within 1 hour", "Treatment of abnormal vaginal discharge prenatally, 1% tetracycline eye ointment within 1 hour"], "ans": 3, "exp": "Prevention: treat maternal GC/chlamydia before delivery + apply 1% tetracycline eye ointment to neonate within 1 hour of birth."}, {"q": "Management of hypotonic uterine action in labour includes:", "opts": ["IV infusion of 10% dextrose", "IV infusion of syntocinon in 5% dextrose", "IV infusion of syntocinon in normal saline", "IV infusion of buscopan 15mg"], "ans": 2, "exp": "Syntocinon (oxytocin) augmentation in normal saline is used to stimulate uterine contractions in hypotonic uterine action."}, {"q": "A pregnant woman at 20 weeks has varicella exposure. Best management?", "opts": ["Administer varicella vaccine", "Administer VZIG (varicella zoster immune globulin)", "Administer acyclovir", "No treatment needed"], "ans": 1, "exp": "VZIG is given to non-immune pregnant women exposed to varicella. Varicella vaccine is contraindicated in pregnancy."}, {"q": "Bright red painless vaginal bleeding at 30 weeks with breech presentation suggests:", "opts": ["Placental abruption", "Placenta praevia", "Uterine rupture", "Cervical polyps"], "ans": 1, "exp": "Painless bright red bleeding in the third trimester + breech presentation = placenta praevia until proven otherwise. Managed by C-section."}, {"q": "A woman at 24 weeks has cramping, vaginal bleeding, and loss of amniotic fluid. Most likely cause?", "opts": ["Ectopic pregnancy", "Placental abruption", "Preterm labour", "Molar pregnancy"], "ans": 2, "exp": "Cramping + bleeding + amniotic fluid loss before 37 weeks = preterm labour. Requires immediate assessment."}], "Adult Nursing": [{"q": "The main goal of treatment for acute glomerulonephritis is to:", "opts": ["Encourage activity", "Encourage a high protein intake", "Maintain a fluid balance", "Teach urinary catheterisation"], "ans": 2, "exp": "Acute GN: key management is fluid balance (restrict fluids if oliguric), reduce salt, bed rest, and treat hypertension."}, {"q": "Which clinical finding suggests ulcer perforation?", "opts": ["Bradycardia", "Numbness in the leg", "Nausea and vomiting", "A rigid board-like abdomen"], "ans": 3, "exp": "Ulcer perforation causes chemical peritonitis → board-like rigid abdomen due to involuntary guarding. Surgical emergency."}, {"q": "Severe chest pain radiating to the left arm and back indicates:", "opts": ["Cancer of the neck structures", "Hypertension", "Liver disease", "Myocardial infarction"], "ans": 3, "exp": "Classic MI: crushing chest pain radiating to left arm, jaw, and/or back. Immediate ECG and troponin needed."}, {"q": "Pulmonary oedema is associated with failing:", "opts": ["Right atrium", "Left atrium", "Right ventricle", "Left ventricle"], "ans": 3, "exp": "Left ventricular failure → blood backs up into pulmonary veins → increased pulmonary capillary pressure → pulmonary oedema."}, {"q": "Non-modifiable risk factors in coronary artery disease include:", "opts": ["Hyperlipidaemia, hypertension, diabetes mellitus", "Obesity, physical inactivity, family history", "Cigarette smoking, gender, hyperlipidaemia", "Increasing age, gender, family history"], "ans": 3, "exp": "Non-modifiable CAD risk factors: age, sex (male), family history, ethnicity. All others are modifiable."}, {"q": "Pulmonary disorders that cause finger clubbing include:", "opts": ["Pneumonia, asthma, emphysema", "Lung cancer, lung abscess, pulmonary fibrosis", "Cystic fibrosis, pulmonary hypertension, pneumothorax", "Pleural effusion, beryllium disease, chronic atelectasis"], "ans": 1, "exp": "Clubbing: lung cancer, lung abscess, pulmonary fibrosis, bronchiectasis. Simple pneumonia and asthma do NOT typically cause clubbing."}, {"q": "The main cause of enlargement of the thyroid gland (goitre) is:", "opts": ["Pregnancy", "Growth hormone", "Deficient intake of iodine", "Autoimmune disease"], "ans": 2, "exp": "Iodine deficiency is the most common worldwide cause of goitre. Without iodine, thyroid cannot produce T3/T4 → TSH rises → gland enlarges."}, {"q": "A clinical manifestation of acute glomerulonephritis is:", "opts": ["Haematuria", "Hypotension unresolved by fluid administration", "Glucosuria", "Precipitous decrease in serum creatinine"], "ans": 0, "exp": "Acute GN classic triad: haematuria (cola/tea-coloured urine), proteinuria, oedema. Hypertension (not hypotension) is common."}, {"q": "Urinary incontinence: which statement is TRUE?", "opts": ["Caffeine drinks inhibit bladder function", "Cough/stress stimulates accidental urine release", "Diuretics are used to treat incontinence", "Polyuria is a definite cause of incontinence"], "ans": 1, "exp": "Stress incontinence: increased intra-abdominal pressure (coughing, sneezing) overwhelms the urethral sphincter → involuntary urine leakage."}, {"q": "One pre-renal cause of kidney failure is:", "opts": ["Neurogenic bladder", "Prostrate hypertrophy", "Acute glomerulonephritis", "Severe haemorrhage"], "ans": 3, "exp": "Pre-renal AKI = reduced perfusion. Severe haemorrhage causes hypovolaemia → reduced renal perfusion. Neurogenic bladder and BPH are post-renal; GN is intra-renal."}, {"q": "The finding suggesting a blocked drainage catheter following TURP is:", "opts": ["The urine in the drainage bag appears red to pink", "The client reports bladder spasms and the urge to void", "Normal saline irrigant is infusing at 50 drops/minute", "About 1,000ml irrigant instilled; 1,200ml drainage returned"], "ans": 1, "exp": "Bladder spasms + urge to void with no/little drainage = blocked catheter. The clue is symptoms of distension, not just drainage volume."}, {"q": "A comatose client on gastric tube feeds: which assessment finding requires IMMEDIATE response?", "opts": ["Aspiration of 100cc residual formula", "Decrease in bowel sounds", "Urine output of 250cc in past 8 hours", "Decreased breath sounds"], "ans": 3, "exp": "Decreased breath sounds in a comatose tube-fed patient = aspiration/aspiration pneumonia — immediate life-threatening concern."}, {"q": "An appropriate nursing diagnosis for a client with renal calculi is:", "opts": ["Ineffective tissue perfusion", "Functional urinary incontinence", "Acute pain", "Decreased cardiac output"], "ans": 2, "exp": "Renal calculi cause severe colicky pain (ureteric colic). Acute pain is the priority nursing diagnosis."}, {"q": "A patient is receiving morphine post-op with RR of 8 breaths/min and drowsiness. Best action?", "opts": ["Discontinue the morphine and notify physician", "Administer naloxone as per standing order", "Decrease morphine dosage and monitor", "Encourage deep breaths"], "ans": 1, "exp": "Naloxone is the opioid antidote that reverses respiratory depression. Deep breathing is insufficient for significant respiratory depression."}, {"q": "The therapeutic action of omeprazole is:", "opts": ["Reduction in amount of acid secreted", "Reduction of peristaltic movement", "Helping stomach lining to repair itself", "Making stomach lining more resistant to damage"], "ans": 0, "exp": "Omeprazole is a PPI that irreversibly blocks H+/K+ ATPase pump in parietal cells, reducing gastric acid secretion by up to 90%."}], "Pharmacology": [{"q": "An example of a 3rd generation cephalosporin is:", "opts": ["Ceftriaxone", "Amikacin", "Erythromycin", "Gentamycin"], "ans": 0, "exp": "3rd gen cephalosporins: Ceftriaxone, Cefotaxime, Ceftazidime. Amikacin/Gentamycin = aminoglycosides. Erythromycin = macrolide."}, {"q": "Drug bioavailability is described as:", "opts": ["Amount of drug accessible at the site of action", "Amount of drug excreted through the kidney", "Amount of drug in the liver", "The dosage"], "ans": 0, "exp": "Bioavailability = fraction of administered drug that reaches systemic circulation and is available at site of action."}, {"q": "The antidote for heparin toxicity is:", "opts": ["Potassium chloride", "Vitamin K", "Protamine sulfate", "Calcium gluconate"], "ans": 2, "exp": "Protamine sulfate reverses heparin. Vitamin K reverses warfarin. Naloxone reverses opioids."}, {"q": "The therapeutic action of omeprazole is:", "opts": ["Reduction in amount of acid secreted in the stomach", "Reduction of peristaltic movement", "Helping stomach lining to repair itself", "Making stomach lining more resistant"], "ans": 0, "exp": "Omeprazole (PPI) irreversibly blocks H+/K+ ATPase pump in gastric parietal cells."}, {"q": "A patient on warfarin asks which food to limit. She should limit:", "opts": ["Bananas", "Green leafy vegetables", "Citrus fruits", "Dairy products"], "ans": 1, "exp": "Green leafy vegetables are high in vitamin K, which antagonises warfarin. Consistent (not eliminated) intake is recommended."}, {"q": "Drug that is the antidote for morphine/opioid overdose:", "opts": ["Protamine sulfate", "Naloxone", "Vitamin K", "Flumazenil"], "ans": 1, "exp": "Naloxone (Narcan) is the opioid antagonist that reverses respiratory depression and sedation from opioid overdose."}, {"q": "Syntometrine used in active management of third stage of labour is a combination of:", "opts": ["Oxytocin and ergometrine", "Oxytocin and misoprostol", "Ergometrine and misoprostol", "Oxytocin and atropine"], "ans": 0, "exp": "Syntometrine = oxytocin 5 units + ergometrine 0.5mg. Given IM at delivery of anterior shoulder for AMTSL."}, {"q": "Which antibiotic class is nephrotoxic and ototoxic?", "opts": ["Cephalosporins", "Macrolides", "Aminoglycosides", "Penicillins"], "ans": 2, "exp": "Aminoglycosides (gentamicin, amikacin, tobramycin) are nephrotoxic and ototoxic. Require TDM and renal function monitoring."}, {"q": "Praziquantel is the drug of choice for:", "opts": ["Malaria", "Schistosomiasis", "HIV", "Tuberculosis"], "ans": 1, "exp": "Praziquantel is effective against all Schistosoma species. It is the drug of choice for schistosomiasis (bilharzia)."}, {"q": "Before removing impacted cerumen, the nurse should instil _______ for 30 minutes:", "opts": ["5% dextrose", "Half-strength Darrow's solution", "Sodium peroxide", "Mineral oil"], "ans": 3, "exp": "Mineral oil (or cerumenolytic drops) softens impacted earwax before removal. Dextrose or Darrow's are not appropriate for ear use."}], "Fundamentals of Nursing": [{"q": "To prevent pressure sores in bedridden patients, the nurse should:", "opts": ["Massage pressure sites, turn patient regularly", "Administer pain killers, catheterise patient", "Offer diet rich in vitamins, monitor vital signs", "Monitor vital signs, turn patient regularly"], "ans": 0, "exp": "Pressure sore prevention: reposition every 2 hours, keep skin clean/dry, use pressure-relieving mattresses, massage around (not on) bony prominences."}, {"q": "When making a patient bed, the procedure should end with:", "opts": ["Nurse mitering the corners", "Nurse washing the hands", "Nurse adjusting the height of the bed", "Taking linen to the laundry"], "ans": 1, "exp": "Hand hygiene after bed-making is essential to prevent cross-infection — always the final step of any clinical procedure."}, {"q": "When guiding a patient with loss of sight, the nurse should:", "opts": ["Ask to hold the nurse's hand at the elbow", "Ask them to hold the nurse around the waist", "Hold their hand", "Hold their arm"], "ans": 0, "exp": "Correct sighted guide technique: visually impaired person holds the guide's arm just above the elbow, allowing them to follow natural body movement."}, {"q": "The nursing action important before an X-ray is:", "opts": ["Sedate the patient", "Keep the patient nil per oral for 6 hours", "Remove metallic objects from the patient", "Administer a contrast dye"], "ans": 2, "exp": "All metallic objects must be removed before X-ray — they obstruct the image and appear as opacities."}, {"q": "For MRI of the abdomen, the nurse should instruct the patient to avoid:", "opts": ["Wearing metal objects during procedure", "Taking oral medication up to 12 hours after", "Urinating prior to procedure", "Eating solid food 12 hours prior"], "ans": 0, "exp": "MRI uses a powerful magnetic field. All metal objects must be removed (implants, jewellery) as they can cause injury and distort images."}, {"q": "An examination done with a radio-opaque dye and X-ray is:", "opts": ["Pap smear", "Barium meal", "Sigmoidoscopy", "Laryngoscopy"], "ans": 1, "exp": "Barium meal uses radio-opaque barium sulfate + X-ray fluoroscopy to visualise the upper GI tract."}, {"q": "A negative feedback response by the body to hyperthermia is:", "opts": ["Shivering", "Sweating", "Vasoconstriction of dermal vessels", "An increase in metabolic rate"], "ans": 1, "exp": "Negative feedback to hyperthermia: sweating (evaporative cooling) and vasodilation. Shivering and vasoconstriction are responses to hypothermia."}, {"q": "When performing bladder irrigation the nurse should:", "opts": ["Monitor input and output chart 24-hourly", "Wash hands before procedure only", "Unblock catheter if fluid fails to return", "Call the doctor if active bleeding is noted"], "ans": 3, "exp": "Active/heavy bleeding from urinary tract during bladder irrigation requires immediate medical notification."}, {"q": "While performing bed making, the nurse ensures bed linen is well straightened. The main reason is to:", "opts": ["Have the ward appear neat", "Demonstrate proper technique to client", "Prevent creases that can cause decubitus ulcers", "Avoid tearing the bed linen"], "ans": 2, "exp": "Wrinkled linen creates pressure points that contribute to skin breakdown and decubitus (pressure) ulcers in immobile patients."}, {"q": "The best nursing action when a patient doesn't understand the physician's explanation of planned surgery:", "opts": ["Quickly explain surgery procedure and risks to client", "Ask supervisor to explain", "Notify the physician", "Cancel the surgery"], "ans": 2, "exp": "Informed consent is the physician's responsibility. The nurse's role is to notify the physician if the patient still doesn't understand."}, {"q": "Nutritional needs of a comatose patient are safely met through:", "opts": ["Small frequent oral feeds", "Nasogastric tube feeding", "Intravenous fluids administration", "Letting patient recover before any feeding"], "ans": 1, "exp": "NGT feeding provides nutrition safely in comatose patients who cannot swallow. IV fluids alone do not provide adequate nutrition."}], "Nursing Theory & Professionalism": [{"q": "Licensing and registration of Nurses in Kenya is the mandate of:", "opts": ["Kenya Progressive Nurses Association", "Kenya National Union of Nurses", "National Nurses Association of Kenya", "Nursing Council of Kenya (NCK)"], "ans": 3, "exp": "The NCK is established under the Nurses Act (Cap 257) and is responsible for licensing, registration, and regulation of nursing practice in Kenya."}, {"q": "One of the following best describes a professional nurse in Kenya:", "opts": ["Trained outside Kenya, communicates well", "Treats clients with dignity, wears clean uniform", "Trained and licensed to practice", "Spiritual, cares about the patients"], "ans": 2, "exp": "A professional nurse in Kenya must be trained from a recognised institution AND licensed by the NCK. This is the defining criterion."}, {"q": "Self-care Deficit Theory in nursing was proposed by:", "opts": ["Florence Nightingale", "Dorothea Orem", "Virginia Henderson", "Jean Orlando"], "ans": 1, "exp": "Dorothea Orem: Self-Care Deficit Theory. Nightingale: Environmental Theory. Henderson: 14 Needs. Peplau: Interpersonal Relations. Watson: Human Caring."}, {"q": "A theory is a set of concepts, definitions, relationships, and assumptions that:", "opts": ["Formulates legislation", "Explains a phenomenon", "Measures nursing function", "Reflects domains of nursing practice"], "ans": 1, "exp": "A theory provides structured concepts and propositions that describe, explain, predict, or prescribe nursing phenomena."}, {"q": "According to the ICN Code of Ethics, the nurse's primary professional responsibility is to:", "opts": ["Maintain professional competence", "People who require nursing care", "The employing organisation", "The medical profession"], "ans": 1, "exp": "ICN Code of Ethics: 'The nurse's primary professional responsibility is to people requiring nursing care.'"}, {"q": "The primary purpose of informed consent is to:", "opts": ["Protect the nurse from legal liability", "Ensure the patient understands and agrees to the planned procedure", "Obtain the physician's approval", "Notify the family of the patient's condition"], "ans": 1, "exp": "Informed consent ensures the patient understands the procedure, its risks, benefits, and alternatives, and voluntarily agrees — respecting patient autonomy."}, {"q": "Anything that interferes with the communication process is referred to as:", "opts": ["Feedback", "Semantic", "Barrier", "Context"], "ans": 2, "exp": "A communication barrier (or 'noise') is anything that interferes with transmission or reception of a message — physical, psychological, semantic, or cultural."}, {"q": "Which is NOT a reason for nutritional status assessment:", "opts": ["Identify population/individuals at risk of malnutrition", "Develop health care programs", "Management of malaria", "Identify those already malnourished"], "ans": 2, "exp": "Malaria management is not a purpose of nutritional assessment. Assessment identifies malnutrition risk, guides programmes, and evaluates interventions."}, {"q": "The action during the EVALUATION phase of the nursing process is:", "opts": ["Have a patient provide input on quality of care received", "Remove surgical staples on scheduled postoperative day", "Provide information on follow-up appointment", "Document patient improved air entry with incentive spirometry"], "ans": 3, "exp": "Evaluation involves assessing whether goals/outcomes were achieved. Documenting improved air entry measures effectiveness of the intervention."}, {"q": "A nurse manager motivates the theatre team with a lunch after saving a patient. Which management theory is applied?", "opts": ["Theory X and Y", "Scientific theory of management", "System management theory", "Human relations theory"], "ans": 3, "exp": "Human relations theory (Mayo): motivation through social rewards, recognition, and group cohesion. Rewards like a team lunch reflect this approach."}], "Paediatric Nursing": [{"q": "The priority nursing diagnosis for a 4-year-old child presenting with diarrhoea:", "opts": ["Altered consciousness", "Fluid volume deficit and electrolyte imbalance", "Fluid volume excess and electrolyte balance", "Elevated body temperatures"], "ans": 1, "exp": "Diarrhoea causes rapid fluid and electrolyte loss. Fluid volume deficit is the most life-threatening and priority concern in paediatric diarrhoea."}, {"q": "Cyanosis on the lips and tongue in sick children indicates:", "opts": ["Poor perfusion", "Altered gaseous exchange", "Hypothermia", "Inadequate venous return"], "ans": 1, "exp": "Central cyanosis (lips, tongue, mucous membranes) = impaired gas exchange with reduced oxygenation. Sign of respiratory or cardiac compromise."}, {"q": "AVPU as used in assessment of level of consciousness in children stands for:", "opts": ["Alertness, Voice response, Pain response, Unresponsiveness", "Awake, Volatile, Pain reaction, Unconsciousness", "Alert, Voice response, Pupil response, Unconsciousness", "Alertness, Volatile, Pain response, Unresponsiveness"], "ans": 0, "exp": "AVPU paediatric scale: Alert, responds to Voice, responds to Pain, Unresponsive. Used for rapid conscious level assessment in emergencies."}, {"q": "An Apgar score of 3 at 5 minutes indicates:", "opts": ["Normal neonatal adaptation", "Mild neonatal depression", "Moderate neonatal depression", "Severe neonatal depression requiring resuscitation"], "ans": 3, "exp": "Apgar score 0-3 at 5 minutes = severe depression requiring immediate resuscitation. 4-6 = moderate; 7-10 = normal."}, {"q": "A caretaker brings a 5-year-old child with bright red blood flowing bilaterally from nasal opening. Initial action:", "opts": ["Pinch the nostrils over the nasal ridge as child leans forward", "Take child to theatre for surgical toileting", "Pinch the nostrils as the child lies supine", "Take the vitals of the child"], "ans": 0, "exp": "Epistaxis management: pinch soft part of nose for 10-15 minutes with child leaning forward (prevents swallowing blood). Never lean back — risk of aspiration."}, {"q": "A 4-year-old child with asthma admitted with wheezing. Nurse's priority intervention?", "opts": ["Administer the prescribed albuterol inhaler", "Increase the child's oxygen supply", "Perform a complete assessment of lung sounds", "Administer oral corticosteroids"], "ans": 0, "exp": "Albuterol (bronchodilator) is first-line for acute asthma exacerbation in children. Immediate bronchodilation relieves bronchospasm."}, {"q": "A 3-year-old child has fever, rash, cough, runny nose, and red eyes. This best supports:", "opts": ["Measles", "Scarlet fever", "Chickenpox", "Roseola"], "ans": 0, "exp": "Measles: 3 Cs (cough, coryza/runny nose, conjunctivitis) + fever and maculopapular rash spreading from face downward."}, {"q": "A 9-month-old infant diagnosed with gastroenteritis. Most important nursing intervention?", "opts": ["Encourage infant to drink small sips of water", "Monitor for signs of dehydration", "Administer antiemetics as prescribed", "Offer solid foods as tolerated"], "ans": 1, "exp": "Dehydration is the primary risk in infant gastroenteritis. Monitor: dry mouth, reduced urine output, sunken fontanelle, loss of skin turgor."}, {"q": "A nurse caring for a child with severe burn. Primary concern in first 24 hours?", "opts": ["Pain management", "Infection prevention", "Fluid resuscitation", "Wound care"], "ans": 2, "exp": "Fluid resuscitation prevents burn shock and restores circulating volume. Burns cause massive fluid loss through damaged skin — first 24h priority."}, {"q": "In children, paralytic ileus accompanies the following metabolic abnormalities EXCEPT:", "opts": ["Hypokalaemia", "Hypocalcaemia", "Uraemia", "Hypermagnesaemia"], "ans": 3, "exp": "Paralytic ileus is associated with hypokalaemia, hypocalcaemia, and uraemia. Hypermagnesaemia does not typically cause paralytic ileus."}], "Mental Health Nursing": [{"q": "A client who has been sexually abused remains calm and quiet. This is an example of which defence mechanism?", "opts": ["Denial", "Dissociation", "Intellectualisation", "Projection"], "ans": 1, "exp": "Dissociation: psychological disconnection from traumatic event. Person appears emotionally detached despite severe trauma — protective mechanism."}, {"q": "According to Sigmund Freud, the structure of the mind is classified as:", "opts": ["Conscious, ID and super ego", "Ego, pre-conscious and ID", "ID, ego and super ego", "Conscious, pre-conscious and unconscious"], "ans": 2, "exp": "Freud's structural model: ID (primal drives), Ego (reality principle, mediator), Super-ego (moral conscience). His topographic model: conscious/preconscious/unconscious."}, {"q": "The state in which a patient repeats words or phrases spoken to them is referred to as:", "opts": ["Echopraxia", "Echolalia", "Neologism", "Word salad"], "ans": 1, "exp": "Echolalia = repetition of words/phrases spoken by others. Echopraxia = imitation of movements. Neologism = invented words. Word salad = incoherent word mixture."}, {"q": "A client with schizophrenia refuses meals. The most appropriate nursing action is:", "opts": ["Allow client to eat whatever is desired at convenience", "Firmly direct the patient to take meals", "Give appetite stimulants and force the patient to eat", "Be with client during meals and get explanations from the patient"], "ans": 3, "exp": "Therapeutic approach: establish rapport, explore reasons for refusal (food delusions?). Being present and non-coercive is most appropriate."}, {"q": "For voluntary admission in a hospital, the client must fill form MOH _____ in duplicate:", "opts": ["306", "314", "308", "400"], "ans": 2, "exp": "MOH 308 is the form used for voluntary psychiatric admission in Kenya."}, {"q": "Neuroleptic malignant syndrome (NMS) is characterised by:", "opts": ["Tardive dyskinesia", "Hyperthermia with muscle rigidity", "Akathisia", "Dystonia"], "ans": 1, "exp": "NMS triad: hyperthermia + severe muscle rigidity + altered consciousness. Associated with elevated CPK, autonomic instability. Medical emergency."}, {"q": "A patient with bipolar disorder experiencing a manic episode. Priority intervention?", "opts": ["Encourage physical activity to reduce energy", "Reduce environmental stimulation and provide a calm setting", "Allow the patient to socialise freely with other patients", "Increase patient's responsibilities to occupy time"], "ans": 1, "exp": "Manic episodes require a low-stimulation environment to reduce agitation. Increased activity or socialisation worsens mania."}, {"q": "A patient with schizophrenia reports hearing voices. Most appropriate nursing response?", "opts": ["Challenge the patient's belief that the voices are real", "Acknowledge that the patient hears the voices without reinforcing them", "Ignore the reports to avoid reinforcing the hallucination", "Encourage group activities to distract from voices"], "ans": 1, "exp": "Acknowledge the patient's experience (therapeutic alliance) without reinforcing the hallucination's reality. Neither dismissing nor confirming the voices."}, {"q": "Sexual relations between children and relatives is termed as:", "opts": ["Rape", "Incest", "Bigamy", "Interrelations"], "ans": 1, "exp": "Incest = sexual relations between persons who are closely related (family members/relatives). Both illegal and a form of child sexual abuse."}, {"q": "When a patient with history of self-harm expresses suicidal ideation, the nurse's FIRST action?", "opts": ["Inform the family immediately", "Assess the patient's immediate safety and risk level", "Remove all potentially harmful objects from the room", "Refer the patient to a psychiatrist"], "ans": 1, "exp": "Risk assessment is the first priority. Evaluate lethality, plan, intent, and means before other interventions."}], "Community & Public Health": [{"q": "Infections that spread through contaminated drinking water are classified as:", "opts": ["Water-borne", "Water-washed", "Water-based", "Water-related"], "ans": 0, "exp": "Bradley's classification: Water-borne = ingested contaminated water (cholera, typhoid). Water-washed = inadequate quantity for hygiene. Water-based = aquatic host pathogens. Water-related = vector uses water habitat."}, {"q": "The drug of choice for treating all species of schistosome is:", "opts": ["Malathion", "Hydroxychloroquine", "Praziquantel", "Ivermectin"], "ans": 2, "exp": "Praziquantel is effective against all Schistosoma species (mansoni, haematobium, japonicum). Ivermectin is used for onchocerciasis and filariasis."}, {"q": "Management of spread of cholera in the community involves:", "opts": ["Referral of the patient to hospital only", "Creating a temporary isolation centre in the community and rehydrating patients", "Quarantining healthcare workers only", "Admitting patients and administering antibiotics only"], "ans": 1, "exp": "Community cholera management: isolate cases locally, provide ORS/rehydration, ensure safe water, practice strict hygiene. Community management prevents spread."}, {"q": "The following vaccines are live attenuated:", "opts": ["Oral polio, pentavalent", "Pentavalent, BCG", "BCG, measles", "Yellow fever, pentavalent"], "ans": 2, "exp": "Live attenuated vaccines: BCG, measles, OPV, yellow fever, MMR, varicella. Pentavalent (DPT-HepB-Hib) is inactivated/subunit."}, {"q": "Community midwifery encourages:", "opts": ["Home deliveries", "Home-grown solutions to pregnancy and child care", "Safe hospital delivery and postnatal follow-up", "Pregnant mothers to seek alternative care"], "ans": 2, "exp": "Community midwifery promotes skilled attendance at birth, safe hospital delivery where possible, and structured postnatal follow-up — not unsupervised home deliveries."}, {"q": "The declaration of Health for All by year 2000 was made in:", "opts": ["1978", "1987", "1986", "1976"], "ans": 0, "exp": "The Alma Ata Declaration (1978) declared 'Health for All by Year 2000' and established primary health care as the key to achieving universal health. Ottawa Charter = 1986."}, {"q": "Cold chain management:", "opts": ["Starts from the health facility to the community", "Starts from the manufacturer to the recipient", "Is a system that uses CHWs and equipment", "Enables use of vaccines for a long time after reconstitution"], "ans": 1, "exp": "The cold chain is the system of storage and transport that keeps vaccines at correct temperatures from manufacturer through to administration to the recipient."}, {"q": "The causative organism for bacillary dysentery is:", "opts": ["Vibrio", "Salmonella", "Shigella", "Amoeba"], "ans": 2, "exp": "Bacillary dysentery is caused by Shigella species. Vibrio = cholera. Amoeba = amoebic dysentery. Salmonella = typhoid/food poisoning."}, {"q": "Spacing methods of family planning include:", "opts": ["Natural methods, chemical barriers, vasectomy", "Mechanical barriers, tubectomy, chemical barriers", "Tubectomy, vasectomy, natural methods", "Chemical barriers, natural methods, mechanical barriers"], "ans": 3, "exp": "Spacing methods = reversible: natural methods, chemical barriers (spermicides), mechanical barriers (condoms, diaphragm). Vasectomy/tubectomy are permanent limiting methods."}, {"q": "The best method for a couple who have met their desired family size:", "opts": ["Condom", "Sterilisation of one partner", "IUCD", "Sterilisation of both partners"], "ans": 1, "exp": "When family size is complete, sterilisation (tubal ligation or vasectomy) of one partner is the most effective and permanent method. Both partners need not be sterilised."}, {"q": "Short-term methods of family planning include:", "opts": ["IUCD and condoms", "Implant insertion and IUCD", "Oral contraceptive and vasectomy", "Microlut and Microgynon"], "ans": 3, "exp": "Short-term methods require regular action: Microlut (POP) and Microgynon (combined OCP) are taken daily. IUCD and implants are long-acting; vasectomy is permanent."}], "Reproductive Health & Contraception": [{"q": "Which is an advantage of using an IUD for contraception?", "opts": ["It requires daily administration", "It provides long-term, reversible contraception", "It is effective only during menstruation", "It has no side effects"], "ans": 1, "exp": "IUDs are long-acting (3-10 years), reversible (fertility returns promptly after removal), and highly effective (>99%)."}, {"q": "Emergency contraception is most effective when taken within:", "opts": ["12 hours of unprotected intercourse", "72 hours of unprotected intercourse", "1 week of unprotected intercourse", "Any time before next period"], "ans": 1, "exp": "Emergency contraception (levonorgestrel) is most effective within 72 hours (3 days), but can be taken up to 120 hours (5 days) after unprotected sex."}, {"q": "Hallmark symptom of menopause:", "opts": ["Increased fertility", "Hot flashes", "Severe depression", "Vaginal bleeding"], "ans": 1, "exp": "Hot flashes (vasomotor symptoms) are the hallmark of menopause, caused by declining estrogen and hypothalamic thermoregulatory dysfunction."}, {"q": "A key consideration for sterilisation as contraception:", "opts": ["It is a reversible procedure", "It is only effective for women under 30", "It is a permanent form of contraception", "It provides protection against STIs"], "ans": 2, "exp": "Sterilisation is considered permanent. It does not protect against STIs, and is not recommended if future fertility may be desired."}, {"q": "Which factor increases a woman's risk for breast cancer?", "opts": ["Family history of breast cancer", "Being physically active", "Breastfeeding", "A low-fat diet"], "ans": 0, "exp": "First-degree family history of breast cancer is a major risk factor. Physical activity, breastfeeding, and low-fat diet are protective."}, {"q": "A woman with difficulty conceiving due to irregular ovulation. Most likely helpful treatment:", "opts": ["Antidepressants", "Clomiphene citrate", "Oral contraceptives", "Sterilisation"], "ans": 1, "exp": "Clomiphene citrate is a selective oestrogen receptor modulator that stimulates ovulation. Most commonly used fertility drug."}, {"q": "Safest contraceptive for immediate postpartum period:", "opts": ["Copper IUD", "Combined oral contraceptives", "Progestin-only pill", "Male condom"], "ans": 2, "exp": "Progestin-only pill is safe postpartum: does not affect milk production and has lower clot risk than combined OCP."}, {"q": "A woman with migraines with aura should avoid which contraceptive?", "opts": ["Progestin-only pill", "Combined oral contraceptives", "Male condoms", "Copper IUD"], "ans": 1, "exp": "Combined OCPs are contraindicated in migraines with aura due to significantly increased risk of ischaemic stroke."}, {"q": "Which contraceptive method provides protection against STIs?", "opts": ["Male condom", "Oral contraceptive pills", "Contraceptive implants", "Copper IUD"], "ans": 0, "exp": "Only barrier methods (condoms) protect against STIs. Hormonal methods and IUDs provide no STI protection."}, {"q": "Most effective STI prevention teaching for teenagers:", "opts": ["Using condoms consistently and correctly", "Choosing partners based on sexual history", "Avoiding sexual activity altogether", "Taking antibiotics before sexual activity"], "ans": 0, "exp": "Consistent, correct condom use provides the most effective barrier against STI transmission, including HIV."}], "HIV & STIs": [{"q": "Primary purpose of PrEP (pre-exposure prophylaxis) for HIV:", "opts": ["To treat acute HIV infection", "To prevent HIV transmission during sexual contact", "To prevent transmission through blood transfusion", "To reduce viral load in HIV-positive individuals"], "ans": 1, "exp": "PrEP (tenofovir/emtricitabine) is taken by HIV-negative individuals at high risk of exposure to reduce acquisition risk by >90%."}, {"q": "Primary method of HIV transmission in sub-Saharan Africa:", "opts": ["Blood transfusions", "Vertical transmission (mother-to-child)", "Intravenous drug use", "Unprotected heterosexual intercourse"], "ans": 3, "exp": "Unprotected heterosexual intercourse accounts for the majority of HIV transmission in sub-Saharan Africa."}, {"q": "Most effective strategy to prevent HIV transmission during labour and delivery in HIV-positive woman:", "opts": ["Elective caesarean delivery", "Intravenous zidovudine during labour", "High-dose ART before delivery", "Prophylactic antibiotic treatment"], "ans": 1, "exp": "IV zidovudine during labour reduces perinatal HIV transmission. Most effective combined with maternal ART."}, {"q": "Recommended prophylactic treatment for PCP (Pneumocystis pneumonia) in HIV patients:", "opts": ["Trimethoprim-sulfamethoxazole (TMP-SMX)", "Isoniazid", "Fluconazole", "Azithromycin"], "ans": 0, "exp": "TMP-SMX is the gold standard for PCP prophylaxis in HIV patients with CD4 <200 cells/mm³."}, {"q": "Main cause of anaemia in patients with HIV:", "opts": ["HIV infection directly causes bone marrow suppression", "Side effects of antiretroviral therapy", "Co-infection with malaria", "HIV-associated renal failure"], "ans": 0, "exp": "HIV directly suppresses bone marrow, reducing RBC production. ART side effects and co-infections can also contribute."}, {"q": "First-line treatment for gonorrhoea:", "opts": ["Oral doxycycline", "Oral metronidazole", "Intramuscular ceftriaxone and oral azithromycin", "Topical clindamycin"], "ans": 2, "exp": "Dual therapy: IM ceftriaxone + oral azithromycin covers gonorrhoea and possible chlamydia co-infection. Penicillin no longer recommended due to resistance."}, {"q": "A patient with HIV: when should ART be initiated?", "opts": ["When CD4 count drops below 200", "Immediately after HIV diagnosis regardless of CD4 count", "Only when symptomatic AIDS-defining illness occurs", "When viral load exceeds 100,000 copies/mL"], "ans": 1, "exp": "Current WHO guidelines recommend initiating ART immediately for all HIV-positive individuals regardless of CD4 count."}, {"q": "Which STI presents with painless genital ulcers?", "opts": ["Gonorrhoea", "Syphilis (primary)", "Herpes simplex virus", "Chlamydia"], "ans": 1, "exp": "Primary syphilis presents with a painless, indurated chancre (genital ulcer). HSV causes painful ulcers. Gonorrhoea/chlamydia cause discharge."}, {"q": "Confirmed STI prevention method that is also highly effective for HIV:", "opts": ["Abstinence only", "Male circumcision", "Consistent and correct condom use", "Spermicides alone"], "ans": 2, "exp": "Consistent, correct condom use provides barrier protection against HIV and most STIs. Male circumcision reduces risk but is not 100% protective."}, {"q": "HPV vaccine prevents which cancers?", "opts": ["Endometrial and ovarian cancer", "Cervical cancer and genital warts", "Breast and ovarian cancer", "Liver and cervical cancer"], "ans": 1, "exp": "HPV vaccine (types 16, 18, 6, 11) prevents cervical cancer (HPV 16/18 = 70% of cases) and genital warts (HPV 6/11). Given to girls aged 9-14 years."}], "Anatomy & Physiology": [{"q": "The layers of the uterus are:", "opts": ["Perimetrium, pericardium, fourchette", "Broad ligament, round ligament, endocervix", "Endometrium, myometrium, perimetrium", "Round ligament, myometrium, ischiocavernosus"], "ans": 2, "exp": "The uterine wall has 3 layers: Endometrium (inner mucosa), Myometrium (middle muscle), Perimetrium (outer serous/peritoneal)."}, {"q": "The pelvic joints include:", "opts": ["One symphysis pubis, two sacrococcygeal joints, two sacroiliac joints", "One symphysis pubis, one sacrococcygeal joint, one sacroiliac joint", "One symphysis pubis, one sacrococcygeal joint, two sacroiliac joints", "One symphysis pubis, two sacrococcygeal joints, one sacroiliac joint"], "ans": 2, "exp": "The pelvis has: 1 symphysis pubis (anteriorly), 1 sacrococcygeal joint, and 2 sacroiliac joints (posterolaterally). Total = 4 joints."}, {"q": "The cell type responsible for bone maintenance is:", "opts": ["Osteoclast", "Osteoblast", "Chondrocyte", "Osteocyte"], "ans": 3, "exp": "Osteocytes are mature bone cells embedded in bone matrix that maintain bone tissue. Osteoblasts form bone; osteoclasts resorb bone; chondrocytes form cartilage."}, {"q": "The most important factors in fracture healing are:", "opts": ["Adequate phosphorus intake, Immobilisation", "Good alignment, Immobilisation", "Adequate calcium intake, wound closure", "Wound closure, adequate potassium intake"], "ans": 1, "exp": "Good bone alignment and adequate immobilisation are the two most critical factors for fracture healing — they prevent malunion and allow callus formation."}, {"q": "The obstetric conjugate of the pelvis is measured from:", "opts": ["Sacral promontory to upper border of symphysis pubis", "Sacral promontory to lower/inner border of symphysis pubis", "Sacral promontory to posterior of symphysis pubis", "Ischial spines to the symphysis pubis"], "ans": 1, "exp": "Obstetric conjugate: sacral promontory to inner/lower border of symphysis pubis (~11 cm). This is the narrowest AP diameter the fetal head must pass."}, {"q": "Fetal lie refers to:", "opts": ["Longitudinal axis of fetus relative to oblique axis of maternal uterus", "Longitudinal axis of fetus relative to transverse axis of maternal uterus", "Longitudinal axis of fetus relative to the long axis of the maternal uterus", "Longitudinal axis of fetus relative to the long axis of the maternal pelvis"], "ans": 2, "exp": "Fetal lie = relationship of the long axis of the fetus to the long axis of the mother's uterus. Can be longitudinal, transverse, or oblique."}, {"q": "The diameter of the lumen of the aorta is mainly controlled by:", "opts": ["The volume of blood flowing through it", "The vasomotor centre in the brain", "Nerve stimulation", "The weather condition surrounding the individual"], "ans": 1, "exp": "The vasomotor centre in the medulla oblongata regulates arterial tone through sympathetic nerve signals to smooth muscle in vessel walls."}, {"q": "A classical symptom of pleurisy associated with pneumonia is:", "opts": ["Hyperpyrexia", "Pain on breathing (pleuritic chest pain)", "Cyanotic nails", "Tachycardia"], "ans": 1, "exp": "Pleurisy causes sharp, stabbing chest pain that worsens with inspiration and coughing — classic pleuritic chest pain."}, {"q": "The diameter used to assess engagement in cephalic presentation is the:", "opts": ["Biparietal diameter", "Suboccipitobregmatic diameter", "Occipitofrontal diameter", "Submentobregmatic diameter"], "ans": 0, "exp": "Engagement = biparietal diameter (widest transverse diameter of fetal head) passes through the pelvic inlet."}, {"q": "Normal fetal heart rate is:", "opts": ["120–160 bpm", "120–140 bpm", "110–160 bpm", "110–140 bpm"], "ans": 0, "exp": "Normal FHR at term: 120–160 bpm. <110 = bradycardia, >160 = tachycardia."}], "Theatre Nursing": [{"q": "Examples of cutting instruments in theatre are:", "opts": ["Dissecting forceps, scissors", "Dissecting forceps, artery forceps", "Scissors, scalpel", "Abdominal retractor, scalpel"], "ans": 2, "exp": "Scissors and scalpel are cutting instruments. Dissecting forceps = grasping. Artery forceps = haemostatic clamps. Retractors = tissue retraction."}, {"q": "The most dangerous complication during induction of spinal anaesthesia is:", "opts": ["Cardiac arrest", "Hypotension", "Hyperthermia", "Respiratory paralysis"], "ans": 3, "exp": "High spinal block can cause total spinal anaesthesia with respiratory paralysis (ascending block to C3-C5 level). Requires immediate airway management and ventilation."}, {"q": "A nurse preparing a patient for surgery: which action should be performed FIRST?", "opts": ["Verifying patient's identity and surgical site", "Administering preoperative antibiotics", "Preparing the sterile field", "Reviewing the patient's medical history"], "ans": 0, "exp": "Patient identity and surgical site verification is the first WHO surgical safety checklist step, preventing wrong-site surgery."}, {"q": "Advantage of balloon valvuloplasty over valve replacement:", "opts": ["Lower doses of anti-rejection drugs required", "The procedure is not associated with infection risk", "Repaired valves tend to function longer than replaced valves", "The procedure can be performed on an outpatient basis"], "ans": 3, "exp": "Valvuloplasty is less invasive than replacement — can be done percutaneously, with shorter recovery, no need for long-term anticoagulation, and no prosthetic valve infection risk."}, {"q": "The nurse has identified risk for infection in a patient undergoing peritoneal dialysis. What nursing action best addresses this risk?", "opts": ["Add antibiotics to dialysate as ordered", "Maintain aseptic technique when administering dialysate", "Administer prophylactic antibiotics by mouth or IV", "Wash skin around catheter site with soap and water before each exchange"], "ans": 1, "exp": "Aseptic technique during all dialysate exchanges is the cornerstone of peritonitis prevention in peritoneal dialysis patients."}, {"q": "Most appropriate traction for a fractured proximal femur:", "opts": ["Russell's traction", "Cervical head halter", "Dunlop's traction", "Buck's extension"], "ans": 3, "exp": "Buck's extension traction is used for proximal femur fractures (hip) to maintain alignment and relieve muscle spasm pre-operatively."}, {"q": "A clinical manifestation of third spacing in a patient with burns is:", "opts": ["Metabolic alkalosis", "Hypermagnesaemia", "Hypercalcaemia", "Hypovolaemia"], "ans": 3, "exp": "Third spacing = fluid shifts from intravascular to interstitial/intracellular spaces. In burns: massive fluid loss → hypovolaemia and circulatory shock."}, {"q": "Which nursing actions will best promote independence for a client in skeletal traction?", "opts": ["Instruct client to call for analgesic before pain becomes severe", "Encourage leg exercise within limits of traction", "Provide skin care to prevent skin breakdown", "Provide an overhead trapeze for client use"], "ans": 3, "exp": "An overhead trapeze allows the patient to reposition, transfer, and perform upper body exercises independently, promoting self-care and preventing complications."}, {"q": "A patient with mastoiditis after radical mastoidectomy. Nurse should identify what priority post-op assessment?", "opts": ["Assessing for mouth droop and decreased lateral eye gaze", "Assessing for scar tissue and cerumen obstructing auditory canal", "Assessing for increased middle ear pressure", "Assessing for gradual onset of conductive hearing loss and nystagmus"], "ans": 0, "exp": "Radical mastoidectomy risks facial nerve (VII) injury. Mouth droop and decreased lateral eye gaze indicate facial nerve damage — priority post-op neurological assessment."}], "Evidence-Based Practice & Research": [{"q": "A nurse is leading a workshop on professional ethics. Which principle is the foundation of nursing ethics?", "opts": ["Accountability", "Patient confidentiality", "Beneficence", "Autonomy"], "ans": 2, "exp": "Beneficence (doing good) is the foundational principle of nursing ethics — actively promoting patient well-being above all."}, {"q": "Most objective way to assess success of a new patient safety protocol:", "opts": ["Gathering subjective feedback from patients", "Analysing patient safety incident reports before and after implementation", "Asking staff to evaluate based on personal experience", "Reviewing the financial cost of implementing the protocol"], "ans": 1, "exp": "Incident reports provide objective, quantifiable outcome data. Patient/staff feedback is valuable but subjective."}, {"q": "Most important quality for a nurse leader in today's healthcare environment:", "opts": ["Strong clinical expertise", "The ability to make quick decisions", "A focus on collaboration and teamwork", "A preference for maintaining hierarchical authority"], "ans": 2, "exp": "Modern healthcare demands interprofessional collaboration. Collaborative leadership improves patient outcomes and staff satisfaction."}, {"q": "Primary benefit of interprofessional education (IPE):", "opts": ["Improved communication and collaboration among healthcare teams", "Increased reliance on physicians for decision-making", "Enhanced individual competence without teamwork", "Decreased length of hospital stays for patients"], "ans": 0, "exp": "IPE aligns healthcare professionals around shared treatment goals, improving coordination and patient outcomes."}, {"q": "A nurse encounters a conflict with a colleague's actions. Best course of action?", "opts": ["Ignore the conflict and continue care", "Confront the colleague publicly", "Discuss the concern privately with the colleague and seek resolution", "Report the colleague to supervisor without addressing directly"], "ans": 2, "exp": "Private resolution maintains professionalism and gives the colleague opportunity to explain. Public confrontation or ignoring escalates the situation."}, {"q": "Most important concept to include in a session on professionalism in nursing:", "opts": ["The importance of continuing education and staying current", "The ability to work independently without relying on others", "Maintaining a strict hierarchical structure", "Avoiding interaction with patients outside the hospital"], "ans": 0, "exp": "Professionalism in nursing is built on lifelong learning and staying current with evidence-based practice."}, {"q": "Paraphrasing as a communication skill means:", "opts": ["You ask the patient to repeat what you tell them", "You get a language interpreter if needed", "You repeat what the client tells you in your own words", "You provide writing materials for hearing difficulties"], "ans": 2, "exp": "Paraphrasing = restating the client's message in your own words to demonstrate understanding and check accuracy."}, {"q": "The best nursing action for a patient reluctant to comply with anti-hypertensive therapy:", "opts": ["Emphasise seriousness and consequences of non-compliance", "Offer detailed explanation of side effects", "Use motivational interviewing to explore patient's concerns and goals", "Recommend the patient seek a second opinion"], "ans": 2, "exp": "Motivational interviewing is evidence-based for improving adherence. It respects patient autonomy and explores intrinsic motivation."}], "Critical Care Nursing": [{"q": "A nurse caring for a patient with a chest tube following thoracotomy. Which action prevents complications?", "opts": ["Clamp the chest tube when patient is ambulating", "Maintain the chest tube system below the level of the patient's chest", "Strip the chest tube to remove clots", "Change the dressing every 48 hours"], "ans": 1, "exp": "Drainage system must always be below chest level to prevent backflow. Clamping risks tension pneumothorax; stripping is not recommended."}, {"q": "Best indicator that a patient is ready to be extubated from mechanical ventilation:", "opts": ["Spontaneous RR of 10-12 breaths/min", "O2 saturation >90% without supplemental O2", "The ability to cough effectively and clear secretions", "Presence of PEEP of 5 cm H2O"], "ans": 2, "exp": "Ability to clear secretions indicates airway protection — the key criterion for safe extubation."}, {"q": "Post-operative patient has hypotension and oliguria. Nurse's primary concern:", "opts": ["Electrolyte imbalances", "Risk for acute renal failure", "Pain management", "Infection prevention"], "ans": 1, "exp": "Hypotension + oliguria = reduced renal perfusion → risk of acute renal failure. Restore perfusion urgently."}, {"q": "In a trauma patient with suspected spinal injury, priority action:", "opts": ["Apply a cervical collar and stabilise the patient", "Administer pain medication for comfort", "Assess the patient's GCS score", "Prepare the patient for CT scan"], "ans": 0, "exp": "Spinal stabilisation is paramount to prevent further cord injury. All other actions are secondary."}, {"q": "ICU patient intubated and sedated. Most important intervention to prevent complications:", "opts": ["Regularly suction the patient's airway", "Administer sedatives to prevent agitation", "Perform passive range-of-motion exercises daily", "Change patient's position every 2 hours"], "ans": 3, "exp": "Repositioning every 2 hours prevents pressure ulcers, atelectasis, and DVT in immobilised patients."}, {"q": "Most effective DVT prevention for post-operative patients:", "opts": ["Administering anticoagulants as prescribed", "Encouraging early and frequent ambulation", "Applying compression stockings", "Ensuring adequate hydration"], "ans": 1, "exp": "Early ambulation promotes venous return and is the most effective DVT prevention strategy. Movement is the primary preventive measure."}, {"q": "During CPR on an unresponsive patient, the nurse should:", "opts": ["Perform chest compressions as rapidly as possible", "Pause compressions every 4-5 minutes for vital signs", "Pause to allow a breath every 10 compressions", "Perform 100-120 chest compressions per minute"], "ans": 3, "exp": "AHA guidelines: 100-120 compressions per minute with ratio 30:2 (compressions:breaths). High-quality compressions at correct rate are critical for ROSC."}, {"q": "A patient with a deep-thickness burn injury. Highest priority nursing diagnosis:", "opts": ["Activity intolerance", "Ineffective coping", "Acute pain", "Anxiety"], "ans": 2, "exp": "Acute pain is the highest priority in burn care. Severe pain from deep burns requires immediate management to prevent shock and allow wound care."}]};
+
+const KB = [{"src": "BScN Paper I", "sec": "SECTION 3: GENITOURINARY SYSTEM AND THE INTEGUMENTS Introduc", "txt": "ould be carefully assessed. Any dehydration must be corrected. Clinical Features History of diarrhoea and vomiting with recent weight loss Dry mouth, lips, tongue, eyes and skin Thirst Sunken eyes and depression of fontanelle Loss of skin elasticity (turgor). Lift up a skinfold over the abdomen or neck and see whether it sinks back slowly. (Note that loss of skin elasticity also occurs in marasmus.) Restlessness, apathy (loss of interest in surroundings), coma Low urine output Rapid acidotic res"}, {"src": "BScN Paper I", "sec": "A GUIDE FOR BACHELOR OF SCIENCE (NURSING) LICENSING EXAMINAT", "txt": "mmonly cause this condition include streptococcus pneumoniae, staphylococcus and Haemophilus Influenzae. Occasionally, infection also spreads from the external ear if the tympanic membrane is perforated. Infection usually leads to accumulation of pus in the middle ear and outward bulging of the tympanic membrane. When the membrane ruptures, there is purulent discharge from the ear (otorrhoea). Chronic otitis media results from repeated attacks of otitis media causing persistent perforation of th"}, {"src": "BScN Paper I", "sec": "SECTION 7: DISEASES OF THE NERVOUS AND ENDROCINE SYSTEMS Int", "txt": "mple, under water seal drainage, patients with severe respiratory distress, etc. Have you come across or heard about the acute room? This can be defined as a room/unit in which a critically ill patient is being actively treated as well as monitored. The purpose of intensive care is to maintain life until the precipitating causes of body failure can be identified and successfully treated to allow the system to regain self-control. Intensive care units are more advanced than acute rooms. Generally"}, {"src": "BScN Paper II", "sec": "SECTION 5: OBSTETRIC ANAESTHESIA, OPERATIONS AND EMERGENCIES", "txt": "al pain Backache due to trauma by the Tuohy needle during the epidural procedure Drugs Used in Epidural Analgesia There are several drugs used in epidural analgesia. These are: Bupivacaine This is administered in strengths of 0.25% and 0.5% and these concentrations are modified as required by diluting with normal saline. It is effective within 10 - 20 minutes of administration and lasts for about two hours during labour. The total dose given is not excessive unless labour is prolonged and toxici"}, {"src": "BScN Paper I", "sec": "A GUIDE FOR BACHELOR OF SCIENCE (NURSING) LICENSING EXAMINAT", "txt": "e waste requires special consideration beyond the scope of this training course. SECTION 2: BASIC NURSING PROCEDURES Introduction In section one, you covered the concepts of infection prevention and control, which you will apply in nursing practice. In this section, you will cover some of the basic procedures which include lifting and moving patients; collection of specimens; neurological assessment; taking vital signs; drug administration; incision and drainage; monitoring intravenous fluids; c"}, {"src": "BScN Paper I", "sec": "A GUIDE FOR BACHELOR OF SCIENCE (NURSING) LICENSING EXAMINAT", "txt": "to respond to light. A doctor, by law, is the one to pronounce the patient dead. Issuing a Death Certificate The laws of Kenya require that a death certificate be issued for each person who has died. The laws specify the information that is needed. Notification of death is usually sent to the Registrar of Births and Deaths. This information is used to compile statistics, which are important in identifying trends, needs and problems in the fields of health and medicine. Look for a death notificat"}, {"src": "BScN Paper IV", "sec": "General", "txt": "h education on clinic follow-up and drug compliance. Abnormalities (Paraphilias) This concept has three dimensions. The first dimension is related to social life. The behaviour of the individual does not conform to what is generally regarded as normal behaviour. However, you should note that the accepted view of what is normal in one community does not necessarily apply to other communities. The second dimension is concerned with the harm that may be inflicted on the sex partner. The third dimen"}, {"src": "BScN Paper II", "sec": "General", "txt": "care and observations of vital signs are maintained twice daily or as necessary. The patient should be discharged at least two to three days after vomiting has ceased. The case should be followed up in the antenatal clinic. Polyhydramnios This is a condition in which the quantity of amniotic fluid exceeds 1500mls. It may not become apparent until it reaches 3000mls. It is a fairly rare condition. Polyhydramnios is associated with the following conditions: \u2022 Oesophageal atresia \u2022 Open neural tube"}, {"src": "BScN Paper I", "sec": "A GUIDE FOR BACHELOR OF SCIENCE (NURSING) LICENSING EXAMINAT", "txt": "tors and pharmacists \u2022 Power to arrest \u2022 Prosecution and punishment of offenders The Act gives schedules of controlled drugs, which are regulated by the Act as: \u2022 First schedule which is a list of narcotic drugs. \u2022 Second schedule which is a list of psychotropic substances \u2022 Third schedule, which is a list of prohibited plants, including cannabis, coca bush and paupers somniferous (opium poppy) Prescribing Controlled Drugs The medical practitioner must write the prescription in ink and in their "}, {"src": "BScN Paper I", "sec": "SECTION 3: GENITOURINARY SYSTEM AND THE INTEGUMENTS Introduc", "txt": "raction and POP refer to the Nursing Council of Kenya Procedure Manual, page185. Dislocations This is a displacement of bones at a joint usually caused by trauma, pathological processes or congenital malformation. Clinical features include painful swelling, deformity and loss of function. Management This is done by closed reduction, which is effected by manual manipulation and/or traction as soon as the child's condition permits. Open reduction is indicated in some cases in order to repair soft "}, {"src": "BScN Paper II", "sec": "General", "txt": "the breast. The nipples should be cared for to avoid complications such as sore Prevention from Infection Infection, especially cross infection, can be minimised by encouraging mothers to handle their own babies. Anybody in contact with the child should be encouraged to wash their hands before handling the baby. Visitors should be controlled, especially in a lying in ward. This helps control infection. Midwives or other attendants with a cold or infections foci, should not work with babies. Babi"}, {"src": "BScN Paper I", "sec": "A GUIDE FOR BACHELOR OF SCIENCE (NURSING) LICENSING EXAMINAT", "txt": "needle into the skin keeping it parallel to the skin at 10-15 degrees angle. Do not massage the area after removing the needle. General Requirements for Giving Injections When giving injections ensure that the following are to be found on the top shelf of the trolley: \u2022 Drugs to be used in a container \u2022 A file \u2022 Sterile water for injection \u2022 Spirit swabs in a bowl \u2022 Disposable sterile syringes and needles in a container \u2022 Receiver for carrying the drug to the bedside \u2022 Paper and pen for relevant"}, {"src": "BScN Paper IV", "sec": "SECTION 1: HISTORICAL BACKGROUND, TRENDS IN AND PRINCIPLES O", "txt": "nd a few encouraging words will go a long way to make your student feel settled. When the basic needs mentioned previously get fulfilled, your learner will want to learn at a higher level and exercise mastery of the skills. At this point, you should find out the relevant learning situations available in the clinical setting. Give the students the necessary support to remain successful and encourage them to look for other learning situations on their own. While nursing, the nurse shares the trium"}, {"src": "BScN Paper II", "sec": "General", "txt": "called the fallopian tubes) \u2022 The ovaries These will now be covered separately. The vagina is a fibro-muscular canal joining the external genitalia and the uterus. The posterior wall of the vagina is longer than the anterior wall. This is because the cervix projects at right angle into the upper part of the anterior wall. Its walls are arranged in folds known as rugae, which allow the vagina to stretch during sexual intercourse and childbirth. The vault is the upper end of the vagina, which form"}, {"src": "BScN Paper I", "sec": "SECTION 1: RESPIRATORY SYSTEM The Structures and Respiratory", "txt": "is defective. Hodgkin's disease is staged according to lymphoid involvement. In the assessment, the objective data that may be obtained is: \u2022 Enlarged lymph nodes \u2022 Progressive anaemia \u2022 Elevated temperature \u2022 Enlarged liver and spleen \u2022 Pressure symptoms due to enlarged nodes Hodgkin's disease is managed depending on the stage of the disease. Radiation, a combination of radiation and chemotherapy, or chemotherapy are the choice methods. The drug combination for Hodgkin's disease is: \u2022 MOPP - Ni"}, {"src": "BScN Paper I", "sec": "A GUIDE FOR BACHELOR OF SCIENCE (NURSING) LICENSING EXAMINAT", "txt": "ms on inanimate objects, such as instruments and surfaces. Disinfectants are not meant to be used on the skin or mucous membranes (AVSC, 1999). There are two types of disinfectants: high level and low level. What you should also note is that microorganisms can live and multiply in disinfectant solutions which can in turn contaminate the instruments and other items, leading to infections. This topic will be covered in more detail later. High Level Disinfectants Low Level Disinfectants High level "}, {"src": "BScN Paper I", "sec": "A GUIDE FOR BACHELOR OF SCIENCE (NURSING) LICENSING EXAMINAT", "txt": "re the right femoral to the right. Palpate the right popliteal and compare it to the left. Note the temperature of the legs and observe any dilated veins in the legs. Palpate for the presence of pitting oedema in the leg and over the sacrum. To examine the neck for distended veins, place the patient in the semi recumbent position (45 degrees). Examining the Lymphatic and Musculoskeletal System Lymphatic system While you are assessing the patient's musculoskeletal and peripheral vascular function"}, {"src": "BScN Paper I", "sec": "SECTION 4: SPECIAL PROCEDURES AND INVESTIGATIONS Introductio", "txt": "ou do not contaminate any area that will come in contact with the sterile field. Trendelenburg Trendelenburg, which is most commonly used in pelvic operations, where the patient is placed supine and the head lowered and the table is broken at the knee joint to lower the lower section slightly to flex the patient\u2019s knees. Patient\u2019s Skin Preparation Skin preparation depends on the area being operated. Preparation of the skin includes vigorous sponging of the skin with a sponge soaked in strong dis"}, {"src": "BScN Paper I", "sec": "SECTION 3: MANAGEMENT OF CRITICALLY ILL PATIENTS Introductio", "txt": "e heart muscles are quivering, which indicates no contraction and no blood flow. Pulseless electrical activity, which has no perceptible pulse or blood pressure. How can you know if a person is in a state of cardiac arrest? The following four diagnostic signs would indicate that cardiac arrest has occurred: \u2022 Breathing stops \u2022 No palpable pulse \u2022 No heartbeat \u2022 Pupils fixed and dilated Management of a Patient with Cardiac Arrest Emergency artificial circulation is restored by intermittent extern"}, {"src": "BScN Paper I", "sec": "A GUIDE FOR BACHELOR OF SCIENCE (NURSING) LICENSING EXAMINAT", "txt": "the bed linen and bed clothing dry Keeping the patient\u2019s hair clean and groomed Positioning the patient Maintain proper positioning of the patient. Ensure there are frequent changes in position. Put the patient in semi-sitting position if dyspnoeic. Place the patient on their side if they have noisy breathing to keep the tongue from obstructing the airway. Controlling the Pain Keep the patient free from pain but do not dull their consciousness or ability to communicate. Control pain when it is m"}, {"src": "BScN Paper I", "sec": "SECTION 3: GENITOURINARY SYSTEM AND THE INTEGUMENTS Introduc", "txt": "he amount of fluid requirements in adults. Example of fluids to be administered: Crystalloids such as Ringer's lactate Give 2ml/Kg/%burn; one half in the first 8 hours post-burns and the other during the next 16 hours. Glucose in water Give in amounts to replace losses in the second 24 hours following burns. The mainstay of burn management is in three phases. Phase 1 (Emergrncy phase) \u2022 Fluid therapy, IV access, fluids given, and monitoring intake and output Wound care - topical antibiotics, deb"}, {"src": "BScN Paper I", "sec": "A GUIDE FOR BACHELOR OF SCIENCE (NURSING) LICENSING EXAMINAT", "txt": "e. 6. Chest X-ray: Shows opacity. 7. Clinical Diagnosis: Pulmonary tuberculosis. Integrated Management of Adolescent and Adult Illness [IMAI] IMAI is a health care strategy that addresses the overall health care of the patient. It focuses on the main clinical conditions that account for most of the deaths among adolescents and adults. It integrates the prevention of illnesses and care into a single health care package. If you use this approach, you will find it more rewarding and it will make yo"}, {"src": "BScN Paper II", "sec": "General", "txt": "given. Syntocinon 40 to 60 units in half litre of 5% dextrose is given by pump. faeces to avoid hookworm infestation. Encourage the practice of child spacing to avoid frequent pregnancies so as to give the woman's body time to replenish her body stores. In addition encourage her to continue coming to antenatal clinic. Prophylactic Medication Give the following supplements to the women throughout pregnancy: \u2022 Ferrous sulphate 200mg three times a day \u2022 Folic acid 5mg daily \u2022 Prophylactic anti mala"}, {"src": "BScN Paper I", "sec": "SECTION 4: SPECIAL PROCEDURES AND INVESTIGATIONS Introductio", "txt": "l clear the urea at the rate of 26ml/minute during acute phase of renal failure. As a nurse, during PD, you must ensure that the dialysate is at the body temparature (37 degrees Celsius) before introduction. This ensures the patient's comfort and provides vasodilation of blood vessels hence increasing solute transport in the peritoneum. The fluid should not be left in the peritoneal cavity longer than required and the amount introduced must be measured so as to compare with the amount drained du"}, {"src": "BScN Paper I", "sec": "A GUIDE FOR BACHELOR OF SCIENCE (NURSING) LICENSING EXAMINAT", "txt": "uld be kept locked and keys kept in the pocket of the one administering drugs. \u2022 Finally, record, interpret and report findings. Monitoring Intravenous Fluids Intravenous fluids are those solutions instilled within the patient\u2019s vein. They may include solutions of water and chemicals normally found within the body, dissolved medications or blood, blood extracts and blood substitutes. You will be expected at times to administer and regulate intravenous fluids. You will also be assigned to care fo"}, {"src": "BScN Paper IV", "sec": "General", "txt": "ature. \u2022 They have a high rate of driving offences when they attain adolescence. Treatments and Outcomes Cerebral stimulants like amphetamines have a quieting effect on children (Pelham, et al cited by Carson 2000). They decrease over activity and distractibility. At the same time, they increase their attention and their ability to concentrate. This enables them to function better at school. Though it does not cure hyperactivity, it is able to reduce behavioural symptoms in about two thirds of t"}, {"src": "BScN Paper II", "sec": "General", "txt": "nal at all. The canal becomes part of the uterine cavity with only the undilated The Stages of Labour Labour is divided into four stages, although in real practice, the process is a continuous one and change from one stage to the other may not be clearly obvious. The four stages of labour are known as First stage, Second stage, Third stage and Fourth stage. Each stage will now be covered in detail. In a primigravida the cervix usually becomes almost fully effaced before any dilation takes place,"}, {"src": "BScN Paper I", "sec": "A GUIDE FOR BACHELOR OF SCIENCE (NURSING) LICENSING EXAMINAT", "txt": "accross the bone. A spiral fracture is where the break coils around the bone. . near as normal anatomical position as possible. Methods used are: \u2022 Open reduction. This is a surgical method of bringing the fractured parts together. \u2022 Closed reduction. Here manipulation is used without viewing the fractures. An x-ray must be taken immediately after. b)Immobilisation A pathologic fracture occurs when the break is at the site of bone disease The aim is to prevent movement of injured parts already r"}, {"src": "BScN Paper I", "sec": "SECTION 3: GENITOURINARY SYSTEM AND THE INTEGUMENTS Introduc", "txt": "onic glomerulonephritis presents with oliguria, proteinuria, haematuria, oedema, and hypertension. This disease represents the last stage and may signal the onset of renal failure. Renal Failure Renal failure describes the inability of the kidneys to remove metabolic waste products and regulate fluids, electrolytes and the pH. It may be acute or chronic. Renal failure is caused by many factors, which can be divided into prerenal, intra-renal and post-renal causes. Acute Renal Failure Is a clinic"}, {"src": "BScN Paper II", "sec": "General", "txt": "ecord every two to four hours temperature, pulse, respiration and blood pressure Contractions should be recorded every 15 to 30 minutes and take care of the bladder every two hours Foetal Condition in Prolonged Labour The following steps should be taken to monitor the foetal condition: \u2022 Monitor the foetal heart continuously every quarter to half hour. \u2022 Observe the amniotic fluid for presence of meconium to rule out foetal distress. \u2022 For secondary hypotonic uterine contraction, commence an int"}, {"src": "BScN Paper II", "sec": "General", "txt": "ns, which is not common in our community but occurs sometimes Intrauterine death Foetal Maturity and Viability Where possible amniocentesis may be performed. The lecithin to sphingomyelin ratio in the liquor is calculated in order to estimate the foetal pulmonary maturity. When the ratio is less than two to one, it means that the lungs are not yet mature and induction of labour should be delayed. At times, steroids are given to the mother to stimulate the foetal lungs to produce surfactant to re"}, {"src": "BScN Paper I", "sec": "A GUIDE FOR BACHELOR OF SCIENCE (NURSING) LICENSING EXAMINAT", "txt": "fusion in the opposite arm or head 9. Apply warm compresses as described earlier Infection of the site may occur and could spread to other parts of the body through the blood stream. Evidence of infection includes: \u2022 The site may appear red and puffy \u2022 Purulent discharge may be present \u2022 The patient may have a rise in temperature and/or chills In the event of possible infection: \u2022 Discontinue the infusion and notify the doctor \u2022 Apply aseptic technique when dressing the wound \u2022 Take pus swab for"}, {"src": "BScN Paper II", "sec": "General", "txt": "tant \u2022 In case of episiotomy or a tear, scrub your hands while your assistant is setting a sterile suturing pack and repair the tear Ask the mother to lie on her back with her legs crossed on each other Ask the assistant to hand over the baby to the mother Leave the mother to rest while you go to examine the placenta Procedure Write down any reasons you can think of, for examining the placenta. You now know why we examine the placenta. But how do you go about it? The Fourth Stage of Labour The f"}, {"src": "BScN Paper II", "sec": "General", "txt": "the mother, such as syphilis, tuberculosis, chronic nephritis, cardiac disease, diabetes and thyroid disease, may lead to premature labour \u2022 Acute infections in the mother, like pneumonia, influenza, rheumatic fever and malaria could induce premature labour \u2022 Physical stress caused by non obstetric surgery may lead to premature labour if the mother has this procedure while pregnant \u2022 Congenital malformation of the foetus \u2022 Habitual abortion owing to incompetent cervical OS or uterine malformatio"}, {"src": "BScN Paper I", "sec": "SECTION 7: DISEASES OF THE NERVOUS AND ENDROCINE SYSTEMS Int", "txt": "ensive Care Unit Neonates requiring critical care are admitted and managed here. High Dependant Unit These function as a step down to ICU. Patients are nursed in these units after discharge from ICU before getting to the general wards. Burns Unit You have looked at an intensive care unit in general but it is important to note that many hospitals do not have separate units for the different types of critical care given. In most cases, they are all carried out in the intensive care unit. However, "}, {"src": "BScN Paper I", "sec": "A GUIDE FOR BACHELOR OF SCIENCE (NURSING) LICENSING EXAMINAT", "txt": "e muscles, which will injure tissues and often put unnecessary strain on joints. Avoid causing friction on the patient\u2019s skin. Roll or push the patient when possible rather than pull them across bed linens. Friction can be reduced by sprinkling powder or cornstarch on the patient\u2019s skin and linens. Use smooth rather than jerky movements when transferring the patient. Jerky motion tends to put extra strain on muscles and joints and is uncomfortable for the patient. Be realistic about how much you"}, {"src": "BScN Paper I", "sec": "SECTION 3: GENITOURINARY SYSTEM AND THE INTEGUMENTS Introduc", "txt": "es normally excreted in the urine. The stones can be made of calcium, magnesium, ammonium phosphate, uric acid or cystein compounds. Contributing factors to formation of stones are hypercalcaemia, immobilisation, hyperthyroidism, urinary tract infections, gout, cytotoxic therapy, and a diet that is rich in purines. Pain is the major symptom of the stones. They can also cause other symptoms related to obstruction. People who get severe dehydration are at risk of stone formation if they are predis"}, {"src": "BScN Paper I", "sec": "A GUIDE FOR BACHELOR OF SCIENCE (NURSING) LICENSING EXAMINAT", "txt": "requires special attention in order to maintain a safe and pleasant environment. This is important in order to: \u2022 Minimise the spread of infections and reduce the risk of accidental injury to staff, patients, visitors and the local community \u2022 Help provide an aesthetically pleasing atmosphere \u2022 Reduce odours \u2022 Reduce the chances of attracting insects and animals \u2022 Reduce the likelihood of contaminating the soil or ground water with chemicals or micro-organi Anyone who handles medical or hazardou"}, {"src": "BScN Paper II", "sec": "General", "txt": "the blood sugar level, signs and symptoms of hypo/hyperglycaemia and what to do. Management of the Diabetic Case During Labour After the good care prenatally you still have to maintain observation during labour and delivery. The mothers who are at risk, for instance those with a bad obstetric history, the elderly primigravidae, the mother with pre-eclampsia and a baby that is too big, should not deliver vaginally. At 36 to 38 weeks the mother is admitted for elective Caesarean section. On the da"}, {"src": "BScN Paper IV", "sec": "SECTION 1: CONCEPTS AND CONTRIBUTION OF RESEARCH Introductio", "txt": "y cheaper. They are initiated where results are required as a matter of urgency. Quasi-experimental Research This is a type of quantitative research whose purpose is to examine causal relationships or to determine the effects of one variable on another (Burns & Grove, 1999). Quasi-experimental studies involve implementing a specific treatment and then later examining the effects of this treatment using selected methods of measurement. Quasi-experimental study is a type of intervention study. SEC"}, {"src": "BScN Paper I", "sec": "A GUIDE FOR BACHELOR OF SCIENCE (NURSING) LICENSING EXAMINAT", "txt": "and may render the use of the involved limb difficult. This could be a result of neurological disease and can lead to lower back pain, and muscle pull. Care of Adults with Muscle and Ligament Disorders You have learnt about several soft tissue injuries, including sprains, strains, dislocations and subluxation. These are abnormalities affecting the articular points. The main goals of management of sprains and strains are to return the limb to normal function and to ensure satisfactory pain relief"}, {"src": "BScN Paper I", "sec": "SECTION 3: GENITOURINARY SYSTEM AND THE INTEGUMENTS Introduc", "txt": "ection (temperature, obvious pus around the burn area). Burns Percentage Diagram Diagnostic Investigations \u2022 The single most important laboratory test is the haemoglobin level (or haematocrit Management First Aid in the Home If anyone gets a scald from a hot liquid or a burn from a hot object in the home the resulting damage can be minimised if the skin is cooled immediately by dipping in clean, cold water. If this is done a few seconds after the accident, it may be possible to prevent a deep bu"}, {"src": "BScN Paper I", "sec": "SECTION 3: MANAGEMENT OF CRITICALLY ILL PATIENTS Introductio", "txt": ". In conclusion, the choice of management measures will be guided by ensuring an accurate diagnosis of the extent of body damage. After this, corrective and life sustaining measures are to be taken to allow the body time to recover. Acute, Chronic and End Stage Renal Failure Acute renal failure describes an abrupt and almost complete cessation of renal function. Chronic renal failure, on the other hand, describes an irreversible reduction in renal functions of a progressive nature. While acute r"}, {"src": "BScN Paper I", "sec": "A GUIDE FOR BACHELOR OF SCIENCE (NURSING) LICENSING EXAMINAT", "txt": "ion and teach the patient to avoid rapid postural changes. Moderate exercises to improve muscle tone which reduces stooping and shuffling movements. Patient should be instructed to walk slowly and carefully. Provide adequate rest to prevent fatigue. General nursing care includes assisting the patient to feed slowly, prevent constipation and provide psychological support to counteract depression, discouragement and hopelessness. Speech therapy should be done to correct dysarthia. Involve patient "}, {"src": "BScN Paper II", "sec": "General", "txt": "r has no obvious complaints. There moderate or severe. are three cardinal signs. Mild Pre-eclampsia This is detected when, after resting, the diastolic pressure is 15 to 20mm/hg above the basal blood pressure recorded in early pregnancy or a diastolic above 80 to 90mm/hg, for example, BP 130/80 to 140/90. Oedema of feet, ankles and pretibial region may also be present. Moderate Pre-eclampsia This is diagnosed when there is marked rise in both systolic and diastolic pressure - 140/100 to 160/100m"}, {"src": "BScN Paper I", "sec": "A GUIDE FOR BACHELOR OF SCIENCE (NURSING) LICENSING EXAMINAT", "txt": "includes protozoa (such as those that cause malaria), helminths and arthropods. The helminths are mobile parasites, while arthropods are vectors of diseases, for example, ticks. Others are ecto--parasites, for example, lice and mites that cause scabies. Ecto-parasites live on the outer body surface of their host. Malaria You will now look at a parasitic disease that presents a great challenge to health care services in our country. This is malaria. Malaria is a parasite disease caused by Plasmod"}, {"src": "BScN Paper II", "sec": "General", "txt": "of contractions in ten minutes \u2022 Fluid balance \u2022 Urinalysis \u2022 Drugs administered When observing the contractions, you should note the following: \u2022 Uterine contraction duration, strength and frequency \u2022 In early labour the contractions are mild, lasting 20 to 30 seconds and are infrequent \u2022 As labour progresses, the contractions become stronger, lasting 40 to 50 seconds and are about three contractions per ten minutes \u2022 The uterus should always relax between contractions \u2022 The cervix dilates prog"}, {"src": "BScN Paper I", "sec": "SECTION 3: GENITOURINARY SYSTEM AND THE INTEGUMENTS Introduc", "txt": "ry secretions is carried out from time to time in addition to postural drainage. Management You should begin to give health education as early as the patient\u2019s condition improves, instead of waiting until the last minute. This gives the patient and their family time to absorb and understand the information and consider any questions they might have. Environmental Control The house and home environment should be kept clean and free from dust. The child needs to be supervised so that they do not g"}, {"src": "BScN Paper II", "sec": "General", "txt": "ymptomatic bacteriuria. However, it causes more concern because of its symptoms. As stated earlier, urinary tract infection occurs more frequently in pregnancy. This is because: \u2022 The pregnant uterus causes pressure on the ureters and the bladder which delays emptying. \u2022 The action of hormones on the smooth muscles of the ureters and bladder also causes them to relax and dilate easily. This causes urine to move more slowly down the dilated tubes and infection lodges in them easily. \u2022 Normally th"}, {"src": "BScN Paper IV", "sec": "General", "txt": "nage them. \u2022 Discuss strategies of avoiding or coping with high risk situations. Make specific plans to avoid drug use, for example, how to respond to friends who still use drugs. \u2022 Identify family or friends who will support stopping drug use. \u2022 Consider options for counselling and/or rehabilitation. In the case of patients who do not succeed or relapse: \u2022 Identify and give credit for any success. \u2022 Discuss situations that led to the relapse. \u2022 Return to earlier steps. The medication to be used"}, {"src": "BScN Paper II", "sec": "SECTION 5: OBSTETRIC ANAESTHESIA, OPERATIONS AND EMERGENCIES", "txt": "reoccurs regularly from puberty to menopause, except when pregnancy intervenes. Proliferative Phase The proliferative phase follows menstruation and lasts up to ovulation. This phase is under the influence of oestrogen. There is growth and thickening of the endometrium in readiness to receive the fertilised ovum. Secretory Phase This is the last stage and follows ovulation. It is also known as the luteal phase. It occurs under the influence of the progesterone hormone and oestrogen from corpus l"}, {"src": "BScN Paper I", "sec": "A GUIDE FOR BACHELOR OF SCIENCE (NURSING) LICENSING EXAMINAT", "txt": "er to manage this patient for the potential of development of diabetes mellitus. PART TWO: ADULT NURSING Part two will start with the respiratory system and will highlight topics that have not been covered in part one. The nursing process from the previous units has been used, as this should be applied in patient care. Adult nursing involves the provision of care to all individuals aged above twelve years of age. It forms the core of general nursing practice. As a nurse, you must have cared for "}, {"src": "BScN Paper I", "sec": "A GUIDE FOR BACHELOR OF SCIENCE (NURSING) LICENSING EXAMINAT", "txt": "ications and the appropriate times for administering them. Medication Procedures The Right Client You should make sure that the right client receives the right drug. You should only give drugs to the person for whom they are prescribed or recommended for. If the patient is wearing an identification bracelet, check the client's name on their identification bracelet with the name on the medication card in your hand. Alternatively, if the patient is conscious and sane, simply call out the patient's"}, {"src": "BScN Paper II", "sec": "General", "txt": "management of the baby You will now go through these principles in more detail. Maintenance of the Established Respiration A normal baby should continue to breathe and maintain a good skin colour without medical intervention. A baby who tends to produce a lot of mucus should be closely watched and the airway cleared frequently, because this may tend to interfere with breathing by blocking the airway. The head of the cot should also be lowered in such circumstances. Measures should be taken to av"}, {"src": "BScN Paper II", "sec": "General", "txt": "there is any suspicion of disproportion, a caesarean section will be necessary. Chin has been delivered Once the chin has been delivered allow the occiput to sweep the perineum. In this way the submento-vertical diameter (11.5cm) distends the vaginal orifice, instead of the mento vertical diameter (13.5cm). There are several possible complications during labour with a face presentation. Obstructed Labour A minor degree of contracted pelvis may result in obstructed labour as facial bones do not m"}, {"src": "BScN Paper I", "sec": "SECTION 1: RESPIRATORY SYSTEM The Structures and Respiratory", "txt": "nection from ventilator or blockage Prevention of the over-inflation of the cuff Tracheotomy Tracheotomy is an incision into the trachea for the purpose of establishing an airway. Tracheostomy is the surgical creation of an opening into the trachea through the neck. It is used: \u2022 To bypass airway obstruction \u2022 To facilitate removal of secretions \u2022 To facilitate weaning from a ventilator \u2022 To permit long-term mechanical ventilation and improve patient comfort Care of the patient with tracheostomy"}, {"src": "BScN Paper I", "sec": "SECTION 7: DISEASES OF THE NERVOUS AND ENDROCINE SYSTEMS Int", "txt": "with only minor colonic jerks. The facial expression during an attack is blank. Change into lateral position to facilitate drainage of respiratory secretions from the mouth. Observe skin, eye and mouth colour. Take and record vital signs to monitor tachycardia and hypertension. Observe the degree of consciousness and mental status, the length of sleep, response to sensory stimulation. Any sensory impairment such as vision and hearing should be reported. Medical treatment involves the administrat"}, {"src": "BScN Paper I", "sec": "A GUIDE FOR BACHELOR OF SCIENCE (NURSING) LICENSING EXAMINAT", "txt": "-npropy) \u2022 phenothiazine hydrochloride \u2022 4-hydroxyacetanilide-p-acetami dopherol Efficacy is the effectiveness of a drug in treatment. Safety or Toxicity Safety or toxicity is measured by the incidence Examples of Names Common Drugs Generic Chemical Name Name Acetylsalicylic Ecotrin ASA acid Milk of Phillips Magnesium Magnesi milk of MOM hydroxide um Magnesia Hydrochloride of 4(dimethylamin o1,4a,5,5a,6,11 ,12aTetracycl octahydroine 3,6,10,12,12apentahydroxy6-mythyl-1,11dioxa-2napthacene carboxa"}, {"src": "BScN Paper II", "sec": "General", "txt": "ometrine should be given \u2022 The cord should be delivered controlled cord traction During the puerperium, the following measures should be taken: \u2022 The patient may need to rest and may require sedatives \u2022 Keep her under strict observation half hourly until stable then two to four hourly \u2022 Treat any infections promptly \u2022 If there are no complications, discharge on the tenth day post delivery Management of Heart Disease (Grade III and IV) When managing a patient with severe cardiac disease, the foll"}, {"src": "BScN Paper II", "sec": "SECTION 5: OBSTETRIC ANAESTHESIA, OPERATIONS AND EMERGENCIES", "txt": "patient's history to determine if the products of conception have been expelled. Threatened Slight placental slight bleeding, os closed. Here are some essential measures to take: \u2022 Reassure the patient that, if she continues with the pregnancy, the foetus will not be at greater risk of abnormalities and that it will continue to grow just like in a normal pregnancy. \u2022 Ensure bed rest and allay anxiety (of losing the pregnancy) by administering tabs. Phenobarbitone 30 to 60 mgs tds, morphine 10 mg"}, {"src": "BScN Paper I", "sec": "A GUIDE FOR BACHELOR OF SCIENCE (NURSING) LICENSING EXAMINAT", "txt": "losely associated with the quality of care you provide. You will explore various aspects of death and dying before being faced with the actual experience. You must understand your personal feelings about death and dying before you provide terminal care. If you neglect to do so, you will avoid involvement and remain detached. The most likely result of this attitude is that the dying person and the family will feel emotionally abandoned and are left to face a very frightening situation alone as yo"}, {"src": "BScN Paper II", "sec": "General", "txt": "levels of placental hormones to rise. These cause further uterine contractions. Mechanical Factors Uterine activity can also result from the mechanical stimulation of the uterus and cervix. This may be due to over stretching, as in the case of multiple pregnancy and polyhydromnios, or pressure from the presenting part, when it is well applied to the cervix. It appears that there is a combination of hormonal (from both mother and foetus) and mechanical factors that set labour in motion. Pre-Labou"}, {"src": "BScN Paper I", "sec": "A GUIDE FOR BACHELOR OF SCIENCE (NURSING) LICENSING EXAMINAT", "txt": "actice and experience, especially with relation to site selection and insertion. Selecting a Vein The choice of the site of a vein puncture varies with each patient. While selecting a vein you should consider the following factors: \u2022 Superficial veins are easily located and are more accessible for puncture. \u2022 Veins in the arm and hands are preferred to veins in the foot or leg. \u2022 Use veins in the arm or hand on the patient\u2019s non-dominant site. \u2022 At times, the choices available for possible sites"}, {"src": "BScN Paper II", "sec": "General", "txt": "ged. For more detailed information see the section on Care of Normal Puerperium. SECTION 2: ABNORMAL UTERINE ACTION Introduction Before you begin this section, it is recommended that you review the normal uterine function as you learnt it in the physiology of labour. This section explores abnormalities in uterine action, their causes and management. Post-Version Steps \u2022 Take the foetal heartbeat immediately after the version. For the first few minutes there may be alteration eration of the heart"}, {"src": "BScN Paper I", "sec": "SECTION 1: RESPIRATORY SYSTEM The Structures and Respiratory", "txt": "ll come in handy. Patient teaching is important during rehabilitation. They must know how to adjust their lifestyles to cope with their problem. Complications \u2022 Cardiac arrhythmias - this may range from simple tachycardia to complex ventricular rhythms especially when the conducting system has been involved. ECG changes will be involved. \u2022 Congestive heart failure occurs when pumping powers of the heart diminishes. \u2022 Cardiogenic shock will follow in adequate oxygen transport to the tissues. \u2022 Pa"}, {"src": "BScN Paper II", "sec": "General", "txt": "ent to change policies and laws that deny women equal ownership of family assets Encouraging women to join income generating activities with a view of increasing their economic status \u2022 Putting pressure on the government to punish all those individuals who misuse children through labour and force girls into early marriage Sexual Abuse/Violence Sexual violence has been defined as: \u2019any sexual act, attempt to obtain a sexual act, unwanted sexual comments or advances, or acts to traffic women\u2019s sex"}, {"src": "BScN Paper II", "sec": "SECTION 5: OBSTETRIC ANAESTHESIA, OPERATIONS AND EMERGENCIES", "txt": "of consecutive high temperature until the beginning of next menstrual bleeding. Note the following points when taking basal body temperature: \u2022 It should be taken first thing in the morning before rising \u2022 Temperature should be recorded within same hour \u2022 Note temperatures taken outside the hour \u2022 Note all disturbances, for example, all medications \u2022 Use the same thermometer for the entire cycle \u2022 Note the use of a new thermometer \u2022 If the reading stops between two numbers ignore the high one an"}, {"src": "BScN Paper II", "sec": "General", "txt": "ects on the baby. It is important for a midwife to advise the couple that sex is safe except in special conditions, for example, if a woman has had frequent miscarriages. Remember: While giving the health education, let the woman or couple raise their fears or concerns, as different people perceive pregnancy differently. Follow-up Antenatal Visits Can you think of the follow-up visits? The main aim of follow-up visits is to check the general health of the mother and to ascertain the rate of grow"}, {"src": "BScN Paper I", "sec": "SECTION 4: SPECIAL PROCEDURES AND INVESTIGATIONS Introductio", "txt": "terile suction catheters and spare sterile tracheotomy tubes of different sizes. Rehabilitation and Counselling Although counselling will be covered as a subject in module four, the role of rehabilitation and counselling in critical care nursing will be briefly covered here. You may agree that if a patient is either unconscious, on ventilation or dialysis machine, relatives experience some concern. The patient is also likely to have problems coping and adjusting after gaining full recovery. At t"}, {"src": "BScN Paper II", "sec": "SECTION 5: OBSTETRIC ANAESTHESIA, OPERATIONS AND EMERGENCIES", "txt": "it has become a habit. Around the world, successful prevention programmes among young people are ones that equip adolescents with the knowledge, skills and attitudes that will keep them safe from infection before they become sexually active. Alcohol and drug abuse increases HIV transmission risk. This is as a result of impaired judgement that may lead to unprotected sex. Other practices such as intravenous drug use, often associated with the developed world, and drug abuse in general should be d"}, {"src": "BScN Paper I", "sec": "SECTION 3: GENITOURINARY SYSTEM AND THE INTEGUMENTS Introduc", "txt": "een removed and the baby is feeding well orally, their discharge may be planned. Preoperative Care The infant should be nursed in the incubator, kept warm and given highly humidified oxygen to relieve respiratory distress and liquefy secretion. The infant\u2019s head should be slightly elevated and intermittent suction carried out both to the mouth, pharynx and proximal oesophageal pouch. The catheter may have to be changed daily by the doctor or irrigated with normal saline. At intervals the infant'"}, {"src": "BScN Paper I", "sec": "SECTION 4: SPECIAL PROCEDURES AND INVESTIGATIONS Introductio", "txt": "confer with the patient and get permission before consulting other counsellors. Counsellor Competence Competence is an essential element in counselling and is acquired through proper training and practice. The counsellor should, therefore, work within their known limits of competence and should not offer counselling services if their ability or objectivity is impaired due to personal or emotional difficulties, illness, alcohol, drugs, or for any other reason. The counsellor should refer any pati"}, {"src": "BScN Paper I", "sec": "SECTION 4: SPECIAL PROCEDURES AND INVESTIGATIONS Introductio", "txt": "or feel certain of a good grade. People often use the words fear and anxiety to describe the same thing. Fear also describes a reaction to immediate danger characterised by a strong desire to escape the situation. Anxiety develops as a result of a conflict between id, ego and super ego over the control of psychic energy. The physical symptoms of anxiety reflect a chronic 'readiness' to deal with some future threat Anxiety Symptoms Symptoms of anxiety may include: \u2022 Fidgeting \u2022 Muscle tension \u2022 S"}, {"src": "BScN Paper I", "sec": "SECTION 3: GENITOURINARY SYSTEM AND THE INTEGUMENTS Introduc", "txt": "drugs include: lopinavir, nelfinavir, and ritonavir. 4. Fixed drug combination. Assessment of the HIV Infected Infant Before initiating ARV therapy, HIV infected infants or children should be treated by paediatric HIV specialists. When this is not possible the treating clinician should seek consultation with a paediatric specialist. When a child is identified as HIV infected, the clinician should begin an immediate assessment of the child's clinical and immunological status, viral burden, resist"}, {"src": "BScN Paper I", "sec": "SECTION 3: GENITOURINARY SYSTEM AND THE INTEGUMENTS Introduc", "txt": "t is unable to cough up the secretions. For oral drinks, warm milk or warm lemon and honey are enjoyable and very effective. A light but nourishing diet should be given to older children while the young may benefit from dilute milk feeds. A fluid balance chart should always be maintained until the child is able to feed normally, pyrexia settles and general condition much improved. Antibiotics such as crystalline penicillin may be given every four to six hours in the first two to three days. This"}, {"src": "BScN Paper I", "sec": "SECTION 3: GENITOURINARY SYSTEM AND THE INTEGUMENTS Introduc", "txt": "ond the uppermost limit of normal at which a milestone should have been reached. Developmental Warning Signs Not smiling at mother Poor head control Unable to sit unsupported Not crawling Unable to stand with help Not babbling Unable to stand unaided Not walking independently Unable to understand commands Not using two to three words Age 8 weeks 6 months 9 months 12 months 12 months 12 months 15 months 18 months 2 years 2.5 years Factors that Promote Health The health of a growing child can be s"}, {"src": "BScN Paper IV", "sec": "General", "txt": "nuals, which are easily available in WHO and medical training college libraries. Introducing ICD 10 ICD10 is classified in the following manner. Organic, including symptomatic mental F0 disorders. Mental and behaviour disorders due to F1 psychoactive substance use. Schizophrenia, schizotypal and delusional F2 disorders. F3 Mood (affective) disorders. Neurotic, stress related and somatoform F4 disorders. Behavioural syndromes associated with F5 physiological disturbances and physical factors. Dis"}, {"src": "BScN Paper I", "sec": "A GUIDE FOR BACHELOR OF SCIENCE (NURSING) LICENSING EXAMINAT", "txt": "ugs such corticosteroids, oral contraceptives, narcotics and thiazide diuretics. Cholecystitis can be acute or chronic. If chronic, it can contribute to cancer of the gall bladder. Care of the Patient with Gall Bladder Disease The management of an adult with gall bladder disease should start with a primary assessment. The data will be obtained by finding out about the clinical presentation of the disease, which has already been mentioned. In those patients with gall bladder disease, it is advisa"}, {"src": "BScN Paper II", "sec": "SECTION 5: OBSTETRIC ANAESTHESIA, OPERATIONS AND EMERGENCIES", "txt": "scissors. Many procedures are now performed entirely or assisted by laparoscopy. A better view of the pelvis, lower abdomen and visceral contents is also facilitated by injection of a prescribed amount of CO\u00b2 intraperitoneally into the cavity (insufflation). This separates the intestine from the pelvic organs. The e procedure is performed under general anaesthesia, meaning patients have to be prepared preoperatively. The patient is carefully observed for several hours to detect any complications"}, {"src": "BScN Paper II", "sec": "SECTION 5: OBSTETRIC ANAESTHESIA, OPERATIONS AND EMERGENCIES", "txt": "ng soiled linen, treatment of pressure areas, and turning the patient regularly, minimising the risk of skin breakdown such as pressure sores Being available for the patient for physical comfort and psychological support Counselling and Psycho Spiritual Care This component of the caring process includes reducing stress and anxiety for both the patient and family members, promoting positive living, and helping individuals to make informed decisions on HIV testing, plan for the future and behaviou"}, {"src": "BScN Paper I", "sec": "SECTION 3: GENITOURINARY SYSTEM AND THE INTEGUMENTS Introduc", "txt": ", delirium and dementia, mouth ulcers, skin problems and sometimes constipation. About 30,000 new cases of cancer are diagnosed each year However, in many developing countries, this is a forgotten disease, such that when one is diagnosed, the disease will be advanced and there will be few resources to fight it. The main symptoms of cancer include pain, wasting, anaemia, anxiety, depression, skin problems, and infections among others. In this unit you have already covered several neoplasms affect"}, {"src": "BScN Paper I", "sec": "A GUIDE FOR BACHELOR OF SCIENCE (NURSING) LICENSING EXAMINAT", "txt": "and mucous membrane. Yellow Jaundice Is due to increased bile pigments in blood. Is the result of a decrease in the number of red blood cells (anaemia)? Large or small and are the result of ruptured blood Dark purple Purpura vessels, either because of trauma or a systemic areas infection Skin lesions can be single or multiples. They When undertaking the eye examination: can be small or large as well as different in \u2022 Observe eyes for position and alignment to colour, size, shape and skin layer i"}, {"src": "BScN Paper II", "sec": "General", "txt": "ateral flexion of the body: \u2022 Place one hand above and one below the foetal head Depress the head gently toward the anus/neck, making sure it is neither twisted nor bent sideways till the anterior shoulder is free Remind your assistant to give syntometrine 0.5mg intramuscularly (in a single dose) Guide the head upwards in the direction of the mother's abdomen The delivering of posterior shoulder Ask your assistant to continue with the immediate care of the baby Continue with the delivery of the "}, {"src": "BScN Paper I", "sec": "SECTION 3: GENITOURINARY SYSTEM AND THE INTEGUMENTS Introduc", "txt": "emperature. They can also control chest pain, which the patient may complain of. Complications These may develop if the child was brought to the hospital too late. Similarly, inadequate use of antibiotics may lead to complications occurring. The most common ones are chronic bronchitis and broncho pneumonia. Laryngo Tracheo Bronchitis (LTB) This is a combined inflammatory disease process, which affects the larynx, trachea and bronchi simultaneously. Infections of the respiratory tract are general"}, {"src": "BScN Paper II", "sec": "General", "txt": "you to provide good quality antenatal care, you must achieve the following aims: Maternal mortality refers to the death of the mother during pregnancy or within 42 days after the termination of pregnancy. The cause may be related to or aggravated by pregnancy, labour or puerperium. Data from the 2003 Kenya Demographic Health Survey (KDHS) estimated maternal mortality ratio at 414 maternal deaths per 100,000 live births. Perinatal mortality includes stillbirths, which is the death of the foetus a"}, {"src": "BScN Paper II", "sec": "General", "txt": "ine or menstrual blood. The girl\u2019s legs are bound together from hip to ankle and All of these operations present serious consequences to the reproductive health for girls and women. The Potential Health Consequences of FGM \u2022 Medical complications such as haemorrhage, pain, pelvic infection, and painful intercourse \u2022 Complications of childbirth such as obstructed labour due to scarring of tissues. In some communities the husband must give consent before an episiotomy can be performed \u2022 The proced"}, {"src": "BScN Paper IV", "sec": "SECTION 1: CONCEPTS AND CONTRIBUTION OF RESEARCH Introductio", "txt": "the best style depends on the situation. If one is leading troops in the Persian Gulf, an autocratic style is probably best (of course, many might argue here, too). If one is leading a hospital or university, a more participative and facilitative leadership style is probably best. SECTION 2: LEADERSHIP Introduction As a practising nurse, you will spend most of your working life in health care institutions at all levels, from staff nurse to the highest positions of responsibility. Whatever your r"}, {"src": "BScN Paper I", "sec": "SECTION 3: GENITOURINARY SYSTEM AND THE INTEGUMENTS Introduc", "txt": "iscosity, hence thrombophlebitis, emboli or stroke (cerebral vascular accident). Clinical Features \u2022 Cyanosis, which may be mild or severe and occur depending on the degree of the defect. If blood shunts from the right side to the left side of the heart, the cyanosis will be more marked and noticeable on the mucous membranes of the lips, mouth, pharynx and fingernails. \u2022 Dyspnoea, due to pulmonary oedema and increased carbon-dioxide level in the blood (systemic anoxia). \u2022 Polycythaemia (excessiv"}, {"src": "BScN Paper II", "sec": "SECTION 5: OBSTETRIC ANAESTHESIA, OPERATIONS AND EMERGENCIES", "txt": "with constipation. Obese ese patients should be advised to try and lose weight. Prognosis of Uterine Prolapse Vaginal hysterectomy with anteroposterior colporrhaphy provides excellent and permanent vaginal support and if good healing occurs, preservation of vaginal functions as well. Recurrence may result from unrepaired cystocele and rectocele or from occupational factors such as heavy lifting or straining. You will now move on to the final part of this section and look at traumatic disorders o"}, {"src": "BScN Paper I", "sec": "SECTION 4: SPECIAL PROCEDURES AND INVESTIGATIONS Introductio", "txt": "ith them. \u2022 Give recommendations or suggestions on what the authority should do. Indicate the decisions you want the authority/MOH to rectify and emphasise ideas which help the reader to come up with solutions to the problems. A Health Centre Report consists of four main sections. \u2022 Total number New members Resignations Transfers Retirees Sick leave Staff on leave Cadres of Staff \u2022 Clinical officers \u2022 Laboratory technicians \u2022 Public Health Technicians \u2022 Enrolled Community Health Nurses \u2022 Enrolle"}, {"src": "BScN Paper I", "sec": "SECTION 3: GENITOURINARY SYSTEM AND THE INTEGUMENTS Introduc", "txt": "ommon problem among children, mostly seen in clinics and outpatient departments. Can you think of the factors that might cause this condition? The Most Common Causes \u2022 Infections such as meningitis \u2022 Brain abscess \u2022 Malaria and other febrile conditions, which lead to infections, unrelated to the central nervous system (about 10% of children in the tropics who are seen in hospitals suffer from febrile convulsions) \u2022 Encephalitis \u2022 Otitis media \u2022 Congenital malformation of the central nervous syst"}, {"src": "BScN Paper II", "sec": "General", "txt": "s absorption occurs, but this may take several weeks. No treatment is necessary. Injuries to the Head Injuries to the head may vary from minor skin abrasions to severe internal haemorrhage. \u2022 Premature labour \u2022 Face to pubes presentation \u2022 Breech delivery \u2022 Asphyxia neonatorum Signs of intracranial injury that will be manifested depend on the severity of the condition. On the other hand, the infant may not show all the signs. Skull Fracture This is rarely seen nowadays. Skull fractures used to o"}, {"src": "BScN Paper I", "sec": "A GUIDE FOR BACHELOR OF SCIENCE (NURSING) LICENSING EXAMINAT", "txt": "orm and check the information itemised. Nursing Responsibilities Patient's Death You should always remember that you are still involved with both the patient and the family even after death occurs. The relatives may wish to view the body if the death occurred in their absence. You should ask them if they would wish to be left alone or if they do not mind you accompanying them. If the former, do not be too distant. It is human for you to become involved and attached to patients and their families"}, {"src": "BScN Paper II", "sec": "General", "txt": "so that its long axis fits in this more accommodating anteroposterior diameter. Pelvic Assessment It is very important for you to understand how to assess the landmarks and measurements of the female pelvis. This is because it will help you to anticipate complications that may occur during delivery so that you can take the appropriate action to save the mother and child. The adequacy of the pelvis can be judged clinically through a vaginal examination. Three diameters are measured: The Pelvic Ou"}, {"src": "BScN Paper I", "sec": "A GUIDE FOR BACHELOR OF SCIENCE (NURSING) LICENSING EXAMINAT", "txt": "capillaries from the large intestine are mineral salts, vitamins and some drugs. Microbial activity There are micro-organisms which colonise the large intestine and they synthesise vitamin K and folic acid. Examples are Escherichia coli, enterobacter aerogenes, streptococcus faecalis and clostridium perfringens. The micro-organisms also breakdown proteins which were not digested in the small intestines and amino acids which are produced are deaminated and ammonia is transported to the liver for "}, {"src": "BScN Paper II", "sec": "SECTION 5: OBSTETRIC ANAESTHESIA, OPERATIONS AND EMERGENCIES", "txt": "\u2022 Sexual contact \u2022 Blood transfusion \u2022 Vertical transmission \u2022 Physical contact The clinical features will depend on the stage of infection the patient presents himself or herself in. As mentioned earlier, there are four stages of syphilis namely primary, secondary, latent and tertiary. The stages of infection will be addressed individually. Primary Syphilis After an incubation period of 10 to 90 days, a primary chancre develops at the site of inoculation. The chancre is typically painless, indu"}, {"src": "BScN Paper I", "sec": "SECTION 3: GENITOURINARY SYSTEM AND THE INTEGUMENTS Introduc", "txt": "es than the females. The thickening of the semilunar valves results in stenosis. Pathophysiology The aortic stenosis causes over dilation of the left ventricle and back flow of blood to the left atrium via the mitral valve. The backpressure is further extended to the pulmonary veins resulting in pulmonary vascular congestion. Clinical features of the condition include: \u2022 Growth failure in severe cases but could be normal in mild cases \u2022 Cardiomegally, more marked on the left side of the heart Th"}, {"src": "BScN Paper I", "sec": "A GUIDE FOR BACHELOR OF SCIENCE (NURSING) LICENSING EXAMINAT", "txt": "gland or body \u2022 1 Thymus gland \u2022 2 Ovaries in the female \u2022 2 Testes in the male The Pituitary Gland and the Hypothalamus The pituitary gland lies within the sella turcica, a depression within the sphenoid bone, inferior to the hypothalamus. You have learnt that it is composed of three lobes, the posterior, anterior and middle lobes. The pituitary gland and the hypothalamus act as a unit. The hypothalamus has a direct controlling effect on the pituitary gland and an indirect effect on many others"}, {"src": "BScN Paper II", "sec": "General", "txt": "as they are beliefs, ideas or principles that determine who you are and how you behave. For example, a person who values their family cares about their spouse, children and home life. A person who values education will study hard and pass examinations. Thus values dictate the behaviour of individuals. The individual learns to make decisions consistent with personal values. Values are held dear and encourage self esteem in the individual. Note that you will cover this topic in greater detail in t"}, {"src": "BScN Paper I", "sec": "SECTION 3: MANAGEMENT OF CRITICALLY ILL PATIENTS Introductio", "txt": "te salt and water, care must be exercised in administering fluid to the patient. Radio-contrast agents must be avoided. Since drugs or metabolites often accumulate in renal failure, the administration of drugs should be avoided as much as possible."}, {"src": "BScN Paper I", "sec": "A GUIDE FOR BACHELOR OF SCIENCE (NURSING) LICENSING EXAMINAT", "txt": "es should not be left soaking indefinitely or stored in a disinfectant solution. During your nursing practice you have probably been performing several sterile procedures such as: \u2022 Wound dressing \u2022 Administration of an injection \u2022 Removing stitches, staples and clips \u2022 Shortening or removing drains \u2022 Urinary catheterisation \u2022 Surgical asepsis in an operating room Aseptic can be defined as \"free from sepsis or germ free\". A technique is a method or skill used for a particular task or technical p"}, {"src": "BScN Paper II", "sec": "SECTION 5: OBSTETRIC ANAESTHESIA, OPERATIONS AND EMERGENCIES", "txt": "tached. Subcute and chronic refer to an inversion, which happens 24 hours later. The predisposing causes of acute inversion of the uterus: \u2022 Management of third stage of labour \u2022 Combining fundal pressure and cord traction while conducting third stage \u2022 Use of fundal pressure before separation of placenta \u2022 Placenta acreta \u2022 Unknown cause, such as when the prolapse happens spontaneously \u2022 Sudden emptying of the gravid uterus \u2022 Short cord How can you diagnose acute inversion of the uterus? How to"}, {"src": "BScN Paper I", "sec": "A GUIDE FOR BACHELOR OF SCIENCE (NURSING) LICENSING EXAMINAT", "txt": "lurring Ears Hearing Pain Infection Excessive cerumen Hygiene practices Tinnitus terms of presence or absence of symptoms, past or present. It serves as a check and balance so as to prevent you from overlooking any relevant data. You should record negative and positive responses. Taking into account the history of present illness, analyse the symptom the patient has responded positively to. You should get an overview of general health as well as symptoms related to each body system. You could us"}, {"src": "BScN Paper II", "sec": "SECTION 5: OBSTETRIC ANAESTHESIA, OPERATIONS AND EMERGENCIES", "txt": "to the Centre for Disease Control (CDC), the average time between HIV infection and appearance of signs that could lead to an AIDS diagnosis is eight to ten years. This time varies greatly from person to person and can depend on many factors including the person\u2019s health status and sexual behaviour. Once an adult develops AIDS, the time of death varies from a few months to about two years if no antiretroviral treatment is given. In children (mother to child transmission) the progression is faste"}, {"src": "BScN Paper II", "sec": "General", "txt": "n the baby unit for management after the resuscitative measures are carried out. Induction of Labour in a Diabetic Mother To induce labour, artificial rupture of the membranes is done and oxytocin is put in normal saline, which is regulated depending on the uterine contractions. For the nutritional needs and to prevent hypoglycaemia, a drip of 10% dextrose is set up and regulated at 20 drops per minute. Soluble insulin is given by syringe pump at six units in 60ml of normal saline. This is regul"}, {"src": "BScN Paper II", "sec": "General", "txt": "erineum usually means \u2022 Bulging delivery is imminent Management of Normal Labour Can you recall the equipment you will need during the second stage of labour? You will need a trolley with a top and bottom shelf. Lateral Flexion Following these movements the body bends sideways to follow the curve of the birth canal. The anterior shoulder escapess under the symphysis pubis and the posterior shoulder sweeps the perineum. The body of the baby is born by lateral flexion. To recap, the cardinal movem"}, {"src": "BScN Paper II", "sec": "SECTION 5: OBSTETRIC ANAESTHESIA, OPERATIONS AND EMERGENCIES", "txt": "metoclopramide. Refer for further investigation if there is dehydration; severe Remember: Home based care continues even after the disease has progressed beyond what medicine can cure, that is, the terminal stage and after death, where the person should be given a decent burial, not forgetting the people left, especially children, since they will need lots of support and assistance."}, {"src": "BScN Paper IV", "sec": "General", "txt": "hearing voices. \u2022 Visual hallucinations. \u2022 Withdrawal from others. \u2022 Illusions. Disturbed sleep (reversal of sleep patterns). \u2022 Autonomic features, for example, sweating, tachycardia. Some of the main causes of this condition have been identified as: \u2022 Alcohol intoxication or withdrawal. \u2022 Drug intoxication, overdose or withdrawal. \u2022 Infection. \u2022 Metabolic changes, for example, liver disease, dehydration, hypoglycaemia. \u2022 Head trauma. \u2022 Hypoxia. \u2022 Epilepsy. Medication for Delirium When prescribi"}, {"src": "BScN Paper I", "sec": "SECTION 3: GENITOURINARY SYSTEM AND THE INTEGUMENTS Introduc", "txt": "esophagus and a tracheo oesophageal fistula with associated oesophageal atresia. Clinical Features Gastric reflux into the trachea will occur, causing inhalation of secretions and hydrochloric acid, resulting in ulceration of the mucous membrane. The baby will persistently cough and choke due to aspiration of gastric content. This may lead to the development of pneumonia. Cyanosis is present and respiration disturbed. Management of the condition necessitates surgical repair. As the condition imp"}, {"src": "BScN Paper I", "sec": "SECTION 3: GENITOURINARY SYSTEM AND THE INTEGUMENTS Introduc", "txt": "lves removal of narrow areas followed by anastomosis. Prognosis is usually good. from the left side of the heart or an abnormal opening between the atria, allowing blood from the higher pressure left atrium to flow into the lower pressure right atrium. This results in increased right ventricular output and pulmonary engorgement. This condition is usually discovered on routine medical examination when systolic pressure is found to have a blowing murmur in the area of pulmonary artery. Children su"}, {"src": "BScN Paper II", "sec": "SECTION 5: OBSTETRIC ANAESTHESIA, OPERATIONS AND EMERGENCIES", "txt": "r. \u2022 The user may have an allergy to rubber. \u2022 There is a failure rate of 2-15%. It should be used only once and discarded. Precautions should always be taken. Advise patients to check the expiry date and to ensure proper storage, use and disposal. \u2022 Diaphragm This is a dome shaped rubber device with a flexible rim inserted into the vagina prior to sexual intercourse to prevent conception by forming a barrier. It has to be removed six to eight hours after intercourse. Diaphragms are of different"}, {"src": "BScN Paper I", "sec": "SECTION 3: GENITOURINARY SYSTEM AND THE INTEGUMENTS Introduc", "txt": "aemia, infections and haemorrhage. There are several causes of aplastic anaemia. Suppression of the bone marrow to produce adequate red blood cells Primary bone marrow failure of unknown root Toxic preparations, including drugs like chloramphenical and phenylbutazone Metallic substances, such as lead and gold also fall under this category Chronic or extensive infections such as osteomyelitis, carcinoma of the bones, tuberculosis of the bones Over exposure to radiation, x-rays, radioactive substa"}, {"src": "BScN Paper II", "sec": "General", "txt": "ternal circulation, it will stimulate the formation of antibodies by the mother. The first born is not usually affected unless the mother had previously undergone an abortion. During the third stage of labour, when the placenta is being delivered, the maternal and foetal blood mixes, and the mother\u2019s body is sensitised against the baby\u2019s blood. There are antibodies circulating in the mother\u2019s blood due to this sensitisation. If the mother conceives again and the foetus is Rhesus positive, then t"}, {"src": "BScN Paper II", "sec": "General", "txt": "ld be obvious to you that gender issues have significant impacts on reproductive health, including: homicide, serious injuries to the victim and dependants (children), STD\u2019s/HIV/AIDS, unwanted pregnancies, mental health problems and suicide. The different health impacts can be grouped into three categories: \u2022 Physical \u2022 Psychological \u2022 Social Each of these categories is explored in detail in the following pages. Physical Consequences Unwanted and Early Pregnancy This can either be through rape o"}, {"src": "BScN Paper II", "sec": "General", "txt": "and re-emphasise the importance of attending maternal and child health clinics. SECTION 2: THE NEONATE Introduction In this section you will focus on the new life, that is the neonate, who is now an independent being outside the mother\u2019s womb. \u2018Neo\u2019 means, new, hence the term \u2018neonate\u2019 means newborn. The neonatal period is the first four weeks after birth. A neonate can be classified as, preterm, full term or post term. Objectives By the end of this section, you will be able to: \u2022 Describe the p"}, {"src": "BScN Paper IV", "sec": "General", "txt": "discovered and later abandoned like hydrotherapy, insulin therapy and leucotomy. The current forms of treatments include physical treatment like chemotherapy and electroconvulsive therapy. There are also various psychological treatments, which include: \u2022 Individual/group psychotherapy \u2022 Behaviour therapy \u2022 Occupational therapy \u2022 Rehabilitation \u2022 Cognitive therapy \u2022 Counselling Some of these treatments will be covered in more detail in section two of this unit The scientific period witnessed the "}, {"src": "BScN Paper I", "sec": "SECTION 4: SPECIAL PROCEDURES AND INVESTIGATIONS Introductio", "txt": "\u2022 Marital or family disputes \u2022 Those who need abortion or have procured abortion People requiring reproductive health/family planning assistance Those experiencing sex difficulties/importence Retirees Retrenchees Qualities of a Good Counsellor Patience A good counsellor should be very patient with their patient, no matter how many times the patient repeats themselves. You should not hurry the patient at all or show impatience. Nor should you show you are bored or tired of holding long discussion"}, {"src": "BScN Paper I", "sec": "A GUIDE FOR BACHELOR OF SCIENCE (NURSING) LICENSING EXAMINAT", "txt": "\u2022 Provide time for the patient to perceive confirm or deny the interpretations. Pace the conversation, but do not press the patient to communicate. Too slow a response may be equated with disinterest. Firing questions may be associated with insensitivity. Accepting Reality There comes a time when it becomes apparent that death will no longer be delayed. The patient and their family will find comfort in knowing this. The patient's discomfort is eased if they can express how meaningful and appreci"}, {"src": "BScN Paper IV", "sec": "General", "txt": "obi, however, this community sticks together and helps one another as necessary. Mobility that is not structural is called exchange mobility. The word exchange indicates a tradeoff. In exchange mobility, some people rise to fill positions made available because other people have fallen in the status system. There is little exchange mobility when the ascriptive status rule operates, but if status depends on achievement, there is a fair amount of such movement. Many children of talented and ambiti"}, {"src": "BScN Paper I", "sec": "A GUIDE FOR BACHELOR OF SCIENCE (NURSING) LICENSING EXAMINAT", "txt": "or two years. The Narcotic Drugs and Psychotropic Substances (Control) Act, 1994 This is an Act of Parliament to make provision with respect to the control of the possession of, and trafficking in, narcotic drugs and psychotropic substances and cultivation of certain plants, to provide for forfeiture of property derived from, or used in, illicit traffic narcotic drugs and psychotropic substances and for connected purposes. The Act sets up an Advisory Council to review any drugs likely to be misu"}, {"src": "BScN Paper I", "sec": "SECTION 3: GENITOURINARY SYSTEM AND THE INTEGUMENTS Introduc", "txt": "children the disease resembles rickets and in adults it resembles osteomalacia. What complications can you think of that are associated with obesity? \u2022 Orthopaedic, that is, tibia vara (bow legs) and slipped femoral epiphysis Clinical Features \u2022 Growth retardation \u2022 Muscle weakness \u2022 Bone pain \u2022 Skeleton deformities \u2022 Slipped epiphyses The areas of the body most commonly affected are the joints, eyes, muscles, myocardium, lungs and blood vessels. The latter can lead to gangrene of fingers and to"}, {"src": "BScN Paper I", "sec": "SECTION 4: SPECIAL PROCEDURES AND INVESTIGATIONS Introductio", "txt": "ng abortion \u2022 Fearing they may hate the child if the pregnancy is not terminated \u2022 Wondering why it had to be them As you conduct the interview, continue observing the emotional behaviour displayed by the patient through non-verbal communication. Emotional Behaviours Displayed by Rape Victims \u2022 They may be physically restless \u2022 May keep on crossing and uncrossing their legs \u2022 May keep on rubbing their head, thighs or back \u2022 Wiping their tears with their hands or not wiping their tears at all \u2022 O"}, {"src": "BScN Paper II", "sec": "SECTION 5: OBSTETRIC ANAESTHESIA, OPERATIONS AND EMERGENCIES", "txt": "tives By the end of this section, you will be able to: \u2022 Describe history taking List various tests and gynaecological radiographic diagnostic procedures Gynaecological History History taking should place an emphasis on the gynaecological history of the patient. This does not mean that other histories should be ignored. For the sake of minimising repetition, you will not go through the whole process. When taking a gynaecological history, you should enquire into the following: Menstruation Menstr"}, {"src": "BScN Paper II", "sec": "SECTION 5: OBSTETRIC ANAESTHESIA, OPERATIONS AND EMERGENCIES", "txt": "se start management as follows: \u2022 Keep the patient warm \u2022 Give fresh whole blood \u2022 Give fresh frozen plasma \u2022 Give platelets concentrates This type of care may not be available in small health institutions hence the need for referral. If bleeding persists utero-ovarian artery ligation or subtotal hysterectomy should be considered. Secondary Post Partum Haemorrhage This usually occurs 24 hours after delivery or up to six weeks post delivery. The mother may present with retention of a placenta pie"}, {"src": "BScN Paper I", "sec": "A GUIDE FOR BACHELOR OF SCIENCE (NURSING) LICENSING EXAMINAT", "txt": "h experiences as seeing a child graduate from school enjoying his next birthday. \u201cYes me,\u201d the patient feels sadness and often cries as though they is mourning their own death. \u201cI am ready\u201d. A positive feeling and a readiness characterise the comment for death. This stage is usually peaceful and tranquil. Note that not all persons go through these stages in the order described in the Stages of Dying table. A person may skip one of those stages, or fall back a stage. Stages may overlap. The lengt"}, {"src": "BScN Paper I", "sec": "A GUIDE FOR BACHELOR OF SCIENCE (NURSING) LICENSING EXAMINAT", "txt": "sing the formula above 125 ml x 20 drops/ml = 41.67 = 42 drops per minute 60 min You should then count the number of drops falling into the drip chamber of the tubing per minute. By adjusting the regulator clamp, the number of drops per minute will be increased or decreased until the infusion matches the rate you calculated, i.e. 42 drops per minute. Monitoring the Rate of Infusion It is important to maintain the proper rate of flow because too slow a flow may not meet the patient's needs for fl"}, {"src": "BScN Paper II", "sec": "SECTION 5: OBSTETRIC ANAESTHESIA, OPERATIONS AND EMERGENCIES", "txt": "es while if on the upper half there is continuous passage of faeces per vaginum. Management of VVF and RVF First and foremost, prevention is easier than cure. In most cases fistulae formation can be avoided by: \u2022 Ensuring that labour does not go beyond 12 hours. \u2022 Frequent emptying of bladder or catheterisation during normal labour since a distended bladder is easily traumatised by the pressure of the presenting part, especially in cephalic presentation. \u2022 Control of infection and excoriation (u"}, {"src": "BScN Paper II", "sec": "SECTION 5: OBSTETRIC ANAESTHESIA, OPERATIONS AND EMERGENCIES", "txt": "me, the excessive production of cortisols may hinder menstruation from starting. Developmental Anomalies During the development of the foetus, the vagina, uterus or ovaries may fail to develop. The congenital abnormality in the vagina that causes primary amenorrhoea is an imperforate hymen. In this case, the girl experiences all the feelings and discomforts of menstrual flow. There is actually menstruation and the blood accumulates behind the hymen, (in the vagina), but does not come out. This c"}, {"src": "BScN Paper I", "sec": "SECTION 3: GENITOURINARY SYSTEM AND THE INTEGUMENTS Introduc", "txt": ", and the use of accutane (a drug used in some places in the treatment of acne). Diagnostic Investigations Cleft lip can easily be diagnosed just by observation, but care should be taken to determine whether it is simply confined to the lip or if it is more extensive. Cleft palate can rarely be confirmed by observation. The doctor or nurse/midwife may have to insert their gloved fingers into the mouth and palpate for any incomplete fusions in the roof of the infant\u2019s mouth. Occasionally, an x-ra"}, {"src": "BScN Paper II", "sec": "SECTION 5: OBSTETRIC ANAESTHESIA, OPERATIONS AND EMERGENCIES", "txt": "You are now in the fifth section of this unit on labour. In the previous section you learnt that abnormal labour presents special challenges and carries many risks. This is why you should refer such women to the doctor in the prenatal clinic during their third trimester. They should also be advised to deliver in the hospital, as they may need a caesarean section. In this section, you will study obstetric anaesthesia, operations and emergencies. Urinary Tract Infection Pyelonephritis occurs in a "}, {"src": "BScN Paper II", "sec": "General", "txt": "ginal orifice. Vaginal bleeding may be due to excessive hormones from the mother Neurological Assessment This entails the checking of reflexes, which deal with the function of the baby\u2019s nervous system as well as physical and behavioural assessments. At the beginning of the examination, observe the baby\u2019s movements. These movements involve all extremities and should be random and symmetrical but never stereotyped. Sometimes jitteriness or tremors will be noted. The first time you notice these mo"}, {"src": "BScN Paper II", "sec": "SECTION 5: OBSTETRIC ANAESTHESIA, OPERATIONS AND EMERGENCIES", "txt": "the basal layer along with blood from the capillaries and the unfertilised ovum. The Menstrual Cycle Failure of fertilisation results in menstruation. This discharge is shed from the endometrium. It consists not only of blood but also debris from the uterine wall in the form of mucus and fragments. The menstrual cycle is defined as a series of physiological changes directly related to the development, regression and shedding of the endometrium under various hormonal influences. The monthly cycle"}, {"src": "BScN Paper IV", "sec": "General", "txt": "d the condition is usually found in men (Gayford, cited by Gelder et al., 2000). The treatment approach that has been found to be most effective is a combination of counselling and behavioural techniques. Counselling deals with personal relationships while behaviour deals with self-monitoring. Self-monitoring involves the identification of circumstances that initiated the behaviour so as to avoid them. Drugs that reduce sexual drive like cyproterone acetate have also been used, however, they are"}, {"src": "BScN Paper I", "sec": "SECTION 4: SPECIAL PROCEDURES AND INVESTIGATIONS Introductio", "txt": "re, it is important for health workers to be aware of unconscious communication. The Communication Process Consider the communication process, what takes place when you have a conversation or exchange letters with another person? What are the elements involved? What can go wrong? Make a note of your thoughts and then compare your answer with the following definition defi of the communication process. The communication process can easily be defined as the passing of information from the sender to"}, {"src": "BScN Paper I", "sec": "SECTION 3: GENITOURINARY SYSTEM AND THE INTEGUMENTS Introduc", "txt": "losis. Children under the age of two years are more susceptible than older ones. The pulmonary type of infection makes up to 90% of the total number of patients suffering from tuberculosis. The remaining 10% are extrapulmonary and this condition affects other body organs as you have seen earlier. In developing countries, where there is a lack of facilities for pasteurisation of milk, the extra-pulmonary tuberculosis is just as common as that of the lungs. Usually for children the most common app"}, {"src": "BScN Paper II", "sec": "SECTION 5: OBSTETRIC ANAESTHESIA, OPERATIONS AND EMERGENCIES", "txt": "c organs. \u2022 Sudden death due to extreme syncope as a result of dilatation of the cervix and in some cases from amniotic embolism. Remember: According to the laws of this country, induced abortion is a criminal offence, unless it is done on medical grounds. The illustration below shows the outcome of therapeutic and threatened abortions. Note that threatened abortions are usually spontaneous. Post-Abortal Care (PAC) PAC comprises the comprehensive health care provided to patients with problems of"}, {"src": "BScN Paper I", "sec": "SECTION 7: DISEASES OF THE NERVOUS AND ENDROCINE SYSTEMS Int", "txt": "the eardrum is lost and bulges outwards. \u2022 Hearing may be temporarily impaired. Diagnostic Investigations There are a number of simple investigations, which will confirm the diagnosis. Begin with a personal history from the parents or guardians of the child. A physical examination, to include the ears, throat and cervical lymph nodes, should be undertaken. Additionally, take pus swabs for culture and sensitivity from the discharging ears. Nursing Care Due to severe pain, pyrexia and discomfort, "}, {"src": "BScN Paper IV", "sec": "SECTION 4: MANAGING RESOURCES, CHANGE HEALTH INFORMATION SYS", "txt": "slows. \u2022 To allow the government some control over private means of production, distribution and service provision in the public interest. The management should never be caught up in a surprise strike if they have been in good relations and communication with the employees. Those in Management positions should not be members of trade unions. Financial Resource Management In the previous section, you covered the management of human resources. In this part, you are going to examine financial resou"}, {"src": "BScN Paper II", "sec": "SECTION 5: OBSTETRIC ANAESTHESIA, OPERATIONS AND EMERGENCIES", "txt": "steady pressure and return to position. Once the uterus is in position, instruct your assistant to give 0.5gm oxitocin while you hold the uterus until you feel a hard contraction. Then the placenta can be delivered by using control cord traction. If the doctor comes before you finish the procedure, they can take over. In a health centre you should refer the mother to the hospital if you succeed, for further management. Insert a giving set into the vagina. Use one hand to seal the vaginal orifice"}, {"src": "BScN Paper I", "sec": "SECTION 3: GENITOURINARY SYSTEM AND THE INTEGUMENTS Introduc", "txt": "ody weight in 24 hours is recommended. You should take and record the pulse rate or apex for one whole minute before digoxin is given to the patient as serious bradycardia may occur. Other toxic effects to observe and report to the doctor include anoxia, vomiting and irregular coupling heartbeat. Frusemide (Lasix) A quick acting diuretic is given to facilitate excretion of urine. The recommended dose is 0.5 mg/kg body weight IM. Then 2mg/kg body weight orally. Due to rapid fluid and potassium de"}, {"src": "BScN Paper I", "sec": "A GUIDE FOR BACHELOR OF SCIENCE (NURSING) LICENSING EXAMINAT", "txt": "chool leavers are: \u2022 University of Eastern Africa, Baraton which started in 1988 University of Nairobi which started in March 1992 Moi University which started in September 1998 KENYATTA University Kenya Methodist University (KRCHN BScN upgrading) Other programmes offering first degrees in nursing for registered nurses are conducted at KMTC Nairobi in collaboration with the University of Dundee, Scotland; the Aga Khan University Kenya Campus and the American World University. Egerton University,"}, {"src": "BScN Paper I", "sec": "SECTION 4: SPECIAL PROCEDURES AND INVESTIGATIONS Introductio", "txt": "achievements they have made alone and the necessity for them to be independent. Depression Depression occurs when the patient realises the counsellor is serious and will definitely terminate the counselling relationships. The patient may feel very sad after realising that there is nothing they can do to change the situation. They may experience a feeling of hopelessness and despair. They may also withdraw from their friends. A feeling of depression may also be characterised by anorexia and insom"}, {"src": "BScN Paper I", "sec": "SECTION 3: GENITOURINARY SYSTEM AND THE INTEGUMENTS Introduc", "txt": "cell anaemia and ensure that newborn babies are screened for sickle cells early. Care of Children at Home The parents of children with sickle cell anaemia should be advised to consult their doctors and nurses regularly for help and guidance so that these children may be helped to lead as normal a healthy life as possible. If the children are unwell, however minor their symptoms may be, they should be returned to hospital for treatment. Leukaemia (Leucocythaemias) This is a malignant condition of"}, {"src": "BScN Paper I", "sec": "A GUIDE FOR BACHELOR OF SCIENCE (NURSING) LICENSING EXAMINAT", "txt": "y of the epithelium in the stomach. This results in less hydrochloric acid being produced. The atrophy may be caused by chronic alcoholism or autoantibodies. This disorder produces pernicious anaemia. This is because the production of intrinsic factor is affected. Hence the absorption of vitamin B12 is affected. The condition also predisposes to gastric ulceration and cancer of the stomach. Clinical manifestations of chronic gastritis include vague abdominal discomfort, epigastric tenderness and"}, {"src": "BScN Paper II", "sec": "General", "txt": "spontaneously in two to four months. Occasionally, there is incomplete recovery. Peripheral Nerve Injuries Nerve injuries in the newborn infant may be due to stretching, compression, twisting, hyperextension or separation of the nervous tissue. All these are as a result of complicated labour and delivery. Facial Nerve This is damage to the facial nerve by pressure from the tip of the forceps. Palsy can also follow an apparent normal delivery. You will find that, on the affected side, the infant "}, {"src": "BScN Paper I", "sec": "A GUIDE FOR BACHELOR OF SCIENCE (NURSING) LICENSING EXAMINAT", "txt": "The signs and symptoms include headache, weakness, and deep laboured breathing. Respiratory Alkalosis In this abnormality, there is carbonic acid deficit, mostly due to hyperventilation. The pH will be found to be above 7.5 and it presents with deep rapid breathing, tingling sensations, and tinnitus. What are the common causes of hyperventilation? \u2022 Anxiety \u2022 Crying / Distress \u2022 Grief \u2022 Stress \u2022 Hysteria \u2022 Panic Attack Metabolic Alkalosis An excess of bicarbonate ion and a pH level above 7.5. ch"}, {"src": "BScN Paper II", "sec": "General", "txt": "o need in investing in them, as they will leave the homestead to get married and provide hard labour benefits to the husbands\u2019 side. This poses a great risk to the girl child and her reproductive health right from conception. For example, today with modern technology where sex can be predetermined, it has been noted that out of 8,000 pregnancies terminated annually, only one foetus is a male. In countries where abortion is illegal, infanticide is on the increase, and where girls are born they ar"}, {"src": "BScN Paper I", "sec": "A GUIDE FOR BACHELOR OF SCIENCE (NURSING) LICENSING EXAMINAT", "txt": "orption of the drug Immediately discard needle and syringe into sharps container Always use an injection list to guide you on what drugs to remove from the cupboard! Clearing After giving the injection it is important to ensure that proper clearing takes place. For this reason, you should: \u2022 Tidy the patient\u2019s bed and leave them comfortable \u2022 Remove the screens to their appropriate place Take the trolley or tray to the duty room and clean with soap and water \u2022 Discard swabs in the dustbin and le"}, {"src": "BScN Paper I", "sec": "SECTION 3: GENITOURINARY SYSTEM AND THE INTEGUMENTS Introduc", "txt": "p of Henle and the collecting ducts are in the medulla. Structure of the Nephron Gross Structure of the Kidney A thin, smooth layer of fibrous membrane, called the capsule, covers the surface of each kidney. The lateral surface of the kidney is convex and the medial surface is concave and forms a vertical cleft called the hilum where the renal blood and lymph vessels and nerves enter and renal vein and ureters exit. On cutting the kidney longitudinally, various internal structures can be seen. T"}, {"src": "BScN Paper II", "sec": "SECTION 5: OBSTETRIC ANAESTHESIA, OPERATIONS AND EMERGENCIES", "txt": "in module one. This leaves drug therapy. There is no cure for HIV infection but antiretroviral therapy can assist the infected individual to live a better life. You will now look at antiretroviral therapy and goals of therapy, which include maximal and durable suppression of plasma viral load, preservation or restoration of immunology function, improvement of quality of life and reduction of HIV related morbidity and mortality. To achieve these goals there must be maximum adherence to the antire"}];
+
+const TOPIC_META = {
+  'Obstetrics & Midwifery':        {icon:'🤰',color:'#ff8fab',bg:'rgba(255,143,171,.13)'},
+  'Adult Nursing':                  {icon:'🏥',color:'#5a82ff',bg:'rgba(90,130,255,.13)'},
+  'Pharmacology':                   {icon:'💊',color:'#a78bfa',bg:'rgba(167,139,250,.13)'},
+  'Fundamentals of Nursing':        {icon:'🩺',color:'#34d885',bg:'rgba(52,216,133,.13)'},
+  'Nursing Theory & Professionalism':{icon:'📋',color:'#f5a623',bg:'rgba(245,166,35,.13)'},
+  'Paediatric Nursing':             {icon:'👶',color:'#60d8f5',bg:'rgba(96,216,245,.13)'},
+  'Mental Health Nursing':          {icon:'🧠',color:'#c084fc',bg:'rgba(192,132,252,.13)'},
+  'Community & Public Health':      {icon:'🏘️',color:'#34d885',bg:'rgba(52,216,133,.13)'},
+  'Reproductive Health & Contraception':{icon:'♀️',color:'#ff8fab',bg:'rgba(255,143,171,.13)'},
+  'HIV & STIs':                     {icon:'🔬',color:'#f87171',bg:'rgba(248,113,113,.13)'},
+  'Anatomy & Physiology':           {icon:'🦴',color:'#fb923c',bg:'rgba(251,146,60,.13)'},
+  'Theatre Nursing':                {icon:'🔧',color:'#a78bfa',bg:'rgba(167,139,250,.13)'},
+  'Evidence-Based Practice & Research':{icon:'📊',color:'#5a82ff',bg:'rgba(90,130,255,.13)'},
+  'Critical Care Nursing':          {icon:'❤️',color:'#f87171',bg:'rgba(248,113,113,.13)'},
+};
+
+const TOPIC_DESC = {
+  'Obstetrics & Midwifery':'Labour, delivery, antenatal care, complications',
+  'Adult Nursing':'Medical-surgical, chronic disease management',
+  'Pharmacology':'Drug classes, antidotes, mechanisms of action',
+  'Fundamentals of Nursing':'Procedures, assessment, basic nursing care',
+  'Nursing Theory & Professionalism':'NCK, ethics, nursing models, ICN code',
+  'Paediatric Nursing':'Child assessment, milestones, common conditions',
+  'Mental Health Nursing':'Psychiatry, defence mechanisms, therapeutic communication',
+  'Community & Public Health':'PHC, disease control, immunisation, water',
+  'Reproductive Health & Contraception':'Contraceptive methods, fertility, menopause',
+  'HIV & STIs':'Transmission, prevention, ART, opportunistic infections',
+  'Anatomy & Physiology':'Body systems, fetal anatomy, pelvic measurements',
+  'Theatre Nursing':'Surgical instruments, anaesthesia, perioperative care',
+  'Evidence-Based Practice & Research':'EBP, ethics, communication, leadership',
+  'Critical Care Nursing':'ICU, burns, traction, post-operative care',
+};
+
+// ═══════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════
+let view = 'home'; // 'home' | 'quiz' | 'rag'
+let activeTopic = null;
+let quizPool = [];
+let qIdx = 0;
+let score = 0;
+let answered = false;
+let quizMode = 'practice'; // 'practice' | 'timed' | 'exam'
+let timerID = null;
+let timeLeft = 30;
+
+// ═══════════════════════════════════════════════════════════
+// TF-IDF ENGINE
+// ═══════════════════════════════════════════════════════════
+const STOPS = new Set(['the','a','an','is','in','of','to','and','or','for','with','that','this','are','was','were','be','been','by','from','on','at','as','it','its','not','but','have','has','had','will','would','can','could','should','may','which','who','what','when','where','how','all','each','their','they','them','do','did','does','also','more','most','some','such','than','then','these','those','into','about','during','between','through']);
+function tok(t){return t.toLowerCase().replace(/[^a-z0-9\s]/g,' ').split(/\s+/).filter(w=>w.length>2&&!STOPS.has(w))}
+const chunkToks=KB.map(c=>tok(c.txt+' '+c.sec));
+const df={};const N=KB.length;
+chunkToks.forEach(ts=>{new Set(ts).forEach(t=>{df[t]=(df[t]||0)+1;})});
+function vec(ts){const tf={};ts.forEach(t=>tf[t]=(tf[t]||0)+1);const tot=ts.length||1;const v={};Object.entries(tf).forEach(([t,c])=>{if(df[t])v[t]=(c/tot)*(Math.log((N+1)/(df[t]+1))+1)});return v}
+const chunkVecs=chunkToks.map(vec);
+function cos(v1,v2){const c=Object.keys(v1).filter(k=>v2[k]);if(!c.length)return 0;const d=c.reduce((s,k)=>s+v1[k]*v2[k],0);const n1=Math.sqrt(Object.values(v1).reduce((s,x)=>s+x*x,0));const n2=Math.sqrt(Object.values(v2).reduce((s,x)=>s+x*x,0));return(n1&&n2)?d/(n1*n2):0}
+function retrieve(q,k=5){const qv=vec(tok(q));return chunkVecs.map((cv,i)=>({i,s:cos(qv,cv)})).sort((a,b)=>b.s-a.s).slice(0,k).filter(x=>x.s>.03).map(x=>({...KB[x.i],score:x.s}))}
+
+// ═══════════════════════════════════════════════════════════
+// AI GENERATION
+// ═══════════════════════════════════════════════════════════
+async function callAI(query, evidence){
+  const ctx=evidence.map((c,i)=>`[Source ${i+1}: ${c.src} — ${c.sec}]\n${c.txt}`).join('\n\n---\n\n');
+  const p=`You are an expert NCK BScN exam assistant. Student asked: "${query}"\n\nTEXTBOOK EVIDENCE:\n${ctx}\n\nReturn ONLY valid JSON:\n{"concept_summary":"2-3 sentences","key_facts":["fact1","fact2","fact3","fact4"],"alternative_questions":[{"q":"text","type":"recall","difficulty":"easy","answer":"ans","explanation":"why"},{"q":"MCQ: Which... A. B. C. D.","type":"MCQ","difficulty":"medium","answer":"B. correct","explanation":"why"},{"q":"text","type":"application","difficulty":"medium","answer":"ans","explanation":"why"},{"q":"MCQ: Which... A. B. C. D.","type":"MCQ","difficulty":"hard","answer":"A. correct","explanation":"why"},{"q":"text","type":"analysis","difficulty":"hard","answer":"ans","explanation":"why"},{"q":"text","type":"recall","difficulty":"easy","answer":"ans","explanation":"why"}],"related_concepts":["c1","c2","c3","c4","c5"]}\n\nBase all answers on textbook evidence. NCK exam style. Return ONLY JSON.`;
+  const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1200,messages:[{role:'user',content:p}]})});
+  const d=await r.json();
+  return JSON.parse((d.content?.[0]?.text||'{}').replace(/```json|```/g,'').trim());
+}
+
+// ═══════════════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════════════
+function buildNav(){
+  const items=document.getElementById('navItems');
+  items.innerHTML='<div class="nav-item active" id="nav-home" onclick="showHome()"><span class="ni-icon">🏠</span>Home<span class="ni-count">'+Object.keys(TOPICS_DATA).length+' topics</span></div>';
+  Object.entries(TOPICS_DATA).forEach(([t,qs])=>{
+    const m=TOPIC_META[t]||{icon:'📚',color:'#5a82ff',bg:'rgba(90,130,255,.13)'};
+    items.innerHTML+=`<div class="nav-item" id="nav-${t.replace(/\s/g,'-')}" onclick="showTopic('${t.replace(/'/g,"\\'")}')"><span class="ni-icon">${m.icon}</span>${t}<span class="ni-count">${qs.length}</span></div>`;
+  });
+}
+
+function setActiveNav(id){
+  document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active'));
+  const el=document.getElementById(id);
+  if(el)el.classList.add('active');
+}
+
+// ═══════════════════════════════════════════════════════════
+// VIEWS
+// ═══════════════════════════════════════════════════════════
+function showHome(){
+  view='home'; activeTopic=null;
+  clearInterval(timerID);
+  setActiveNav('nav-home');
+  document.getElementById('topbarTitle').textContent='Home';
+  document.getElementById('topbarSub').textContent='';
+  const total=Object.values(TOPICS_DATA).reduce((s,qs)=>s+qs.length,0);
+  let cards=Object.entries(TOPICS_DATA).map(([t,qs])=>{
+    const m=TOPIC_META[t]||{icon:'📚',color:'#5a82ff',bg:'rgba(90,130,255,.13)'};
+    const desc=TOPIC_DESC[t]||'';
+    return `<div class="topic-card" onclick="showTopic('${t.replace(/'/g,"\\'")}')">
+      <div class="tc-head">
+        <div>
+          <div class="tc-icon" style="background:${m.bg}">${m.icon}</div>
+          <div class="tc-count" style="color:${m.color};margin-top:6px;font-family:var(--mono);font-size:10px">${qs.length} questions</div>
+        </div>
+        <span class="tc-arrow">→</span>
+      </div>
+      <div class="tc-name">${t}</div>
+      <div class="tc-desc">${desc}</div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('content').innerHTML=`
+    <div class="home-hero">
+      <div class="home-hero-eyebrow">NCK BScN Exam Preparation · RAG-Powered</div>
+      <h2>Study Smart.<br>Get Exam Ready.</h2>
+      <p>All ${total} questions organised across ${Object.keys(TOPICS_DATA).length} topics from your BScN textbooks. Practice by topic or ask any question to generate AI-powered alternatives with textbook evidence.</p>
+      <div class="hero-chips">
+        <span class="hero-chip" onclick="setSearch('eclampsia diagnosis')">Eclampsia</span>
+        <span class="hero-chip" onclick="setSearch('hypertension management nursing')">Hypertension</span>
+        <span class="hero-chip" onclick="setSearch('stages of normal labour')">Stages of Labour</span>
+        <span class="hero-chip" onclick="setSearch('Apgar score neonatal assessment')">Apgar Score</span>
+        <span class="hero-chip" onclick="setSearch('placenta praevia vs abruption')">APH</span>
+        <span class="hero-chip" onclick="setSearch('drug bioavailability pharmacology')">Pharmacology</span>
+      </div>
+    </div>
+    <div class="view-hdr">
+      <h1>All Topics</h1>
+      <p>Select a topic to start practising or type a question above to generate AI-powered study content.</p>
+    </div>
+    <div class="topics-grid">${cards}</div>`;
+  closeSidebar();
+}
+
+function showTopic(topic){
+  view='quiz'; activeTopic=topic;
+  clearInterval(timerID);
+  const m=TOPIC_META[topic]||{icon:'📚',color:'#5a82ff',bg:'rgba(90,130,255,.13)'};
+  setActiveNav('nav-'+topic.replace(/\s/g,'-'));
+  document.getElementById('topbarTitle').textContent=topic;
+  document.getElementById('topbarSub').textContent='';
+  quizPool=shuffle([...TOPICS_DATA[topic]]);
+  qIdx=0; score=0; answered=false; quizMode='practice';
+  renderQuizView();
+  closeSidebar();
+}
+
+function renderQuizView(){
+  const topic=activeTopic;
+  const m=TOPIC_META[topic]||{icon:'📚',color:'#5a82ff',bg:'rgba(90,130,255,.13)'};
+  const qs=quizPool;
+  const done=view==='score';
+
+  document.getElementById('topbarTitle').textContent=topic;
+  document.getElementById('topbarSub').textContent=`Q${qIdx+1}/${qs.length}`;
+
+  if(qIdx>=qs.length){renderScore();return;}
+
+  const q=qs[qIdx];
+  const pct=Math.round((qIdx/(qs.length))*100);
+  const letters=['A','B','C','D','E'];
+
+  const timerHtml=quizMode==='timed'?`<div style="font-family:var(--mono);font-size:13px;color:var(--acc)" id="timerDisplay">${timeLeft}s</div>`:'';
+
+  document.getElementById('content').innerHTML=`
+    <div class="quiz-header">
+      <div class="quiz-topic-icon" style="background:${m.bg}">${m.icon}</div>
+      <div>
+        <div class="quiz-topic-name">${topic}</div>
+        <div class="quiz-topic-meta">${qs.length} questions · ${score} correct so far</div>
+      </div>
+      <div class="quiz-actions">
+        <div class="btn-sm" onclick="showHome()">← All Topics</div>
+        <div class="btn-sm" onclick="restartQuiz()">Restart</div>
+      </div>
+    </div>
+
+    <div class="mode-tabs">
+      <div class="mode-tab ${quizMode==='practice'?'on':''}" onclick="setMode('practice')">Practice</div>
+      <div class="mode-tab ${quizMode==='timed'?'on':''}" onclick="setMode('timed')">Timed 30s</div>
+      <div class="mode-tab ${quizMode==='exam'?'on':''}" onclick="setMode('exam')">Exam</div>
+    </div>
+
+    <div class="progress-area">
+      <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${pct}%"></div></div>
+      <div class="progress-stats">
+        <span>Question ${qIdx+1} of ${qs.length}</span>
+        ${timerHtml}
+        <span>Score: ${score}/${qIdx}</span>
+      </div>
+    </div>
+
+    <div class="q-wrap">
+      <div class="q-card">
+        <div class="q-card-top">
+          <div class="q-num-row">
+            <span class="q-num">Q${qIdx+1}</span>
+            <span class="q-source-badge">${topic}</span>
+          </div>
+          <div class="q-text">${q.q}</div>
+          <div class="options-grid" id="opts">
+            ${q.opts.map((o,i)=>`<button class="opt-btn" id="opt${i}" onclick="choose(${i},${i===q.ans})">`+
+              `<span class="opt-ltr">${letters[i]}</span>${o}</button>`).join('')}
+          </div>
+        </div>
+        <div id="expBox"></div>
+        <div class="q-nav">
+          <div class="q-nav-left">
+            <div class="btn-sm" onclick="prevQ()">← Prev</div>
+          </div>
+          <div class="btn-sm primary" id="nextBtn" style="display:none" onclick="nextQ()">
+            ${qIdx+1<qs.length?'Next →':'See Results'}
+          </div>
+        </div>
+      </div>
+    </div>`;
+
+  answered=false;
+  if(quizMode==='timed') startTimer();
+}
+
+function setMode(m){
+  quizMode=m;
+  clearInterval(timerID);
+  renderQuizView();
+}
+
+function startTimer(){
+  timeLeft=30;
+  clearInterval(timerID);
+  timerID=setInterval(()=>{
+    timeLeft--;
+    const el=document.getElementById('timerDisplay');
+    if(el){el.textContent=timeLeft+'s';if(timeLeft<=8)el.style.color='var(--red)'}
+    if(timeLeft<=0){clearInterval(timerID);autoReveal();}
+  },1000);
+}
+
+function autoReveal(){
+  if(answered)return;
+  answered=true;
+  const q=quizPool[qIdx];
+  document.querySelectorAll('.opt-btn').forEach((b,i)=>{b.disabled=true;if(i===q.ans)b.classList.add('reveal')});
+  if(quizMode!=='exam'){
+    const box=document.getElementById('expBox');
+    if(box)box.innerHTML=`<div style="padding:0 22px 16px"><div class="explanation no"><div class="ex-label">⏰ Time's up — Correct Answer</div>${q.opts[q.ans]}${q.exp?`<div style="margin-top:6px;opacity:.8">${q.exp}</div>`:''}</div></div>`;
+  }
+  const nb=document.getElementById('nextBtn');
+  if(nb)nb.style.display='';
+}
+
+function choose(i,isOk){
+  if(answered)return;
+  clearInterval(timerID);
+  answered=true;
+  const q=quizPool[qIdx];
+  document.querySelectorAll('.opt-btn').forEach(b=>b.disabled=true);
+  if(isOk){document.getElementById('opt'+i).classList.add('correct');score++;}
+  else{document.getElementById('opt'+i).classList.add('wrong');document.getElementById('opt'+q.ans).classList.add('reveal')}
+
+  if(quizMode!=='exam'){
+    const box=document.getElementById('expBox');
+    if(box)box.innerHTML=`<div style="padding:0 22px 16px"><div class="explanation ${isOk?'ok':'no'}">
+      <div class="ex-label">${isOk?'✓ Correct!':'✗ Incorrect — '}</div>
+      ${!isOk?`<strong>${q.opts[q.ans]}</strong>`:''}
+      ${q.exp?`<div style="margin-top:${isOk?'0':'6px'}">${q.exp}</div>`:''}
+    </div></div>`;
+  }
+  const nb=document.getElementById('nextBtn');
+  if(nb)nb.style.display='';
+}
+
+function nextQ(){qIdx++;renderQuizView();}
+function prevQ(){if(qIdx>0){qIdx--;renderQuizView();}}
+function restartQuiz(){quizPool=shuffle([...TOPICS_DATA[activeTopic]]);qIdx=0;score=0;answered=false;renderQuizView();}
+
+function renderScore(){
+  clearInterval(timerID);
+  const total=quizPool.length;
+  const pct=total>0?Math.round((score/total)*100):0;
+  const msg=pct>=80?'🎉 Excellent — Exam Ready!':pct>=60?'👍 Good — Keep Revising!':'📚 Keep Practising!';
+  const style=`--pct:${pct}%`;
+  document.getElementById('topbarSub').textContent='';
+  document.getElementById('content').innerHTML=`
+    <div class="score-screen">
+      <div class="score-ring" style="${style}">
+        <div class="score-ring-bg" style="background:conic-gradient(var(--acc) ${pct}%,var(--s3) 0)"></div>
+        <div class="score-ring-inner">
+          <div class="score-pct">${pct}%</div>
+          <div class="score-label">SCORE</div>
+        </div>
+      </div>
+      <div class="score-msg">${msg}</div>
+      <div class="score-sub">${score} correct out of ${total} questions</div>
+      <div class="score-pills">
+        <div class="score-pill g">✓ ${score} correct</div>
+        <div class="score-pill r">✗ ${total-score} wrong</div>
+        <div class="score-pill n">${total} total</div>
+      </div>
+      <div class="score-actions">
+        <div class="btn-sm primary" onclick="restartQuiz()">Retry this topic</div>
+        <div class="btn-sm" onclick="showHome()">← All Topics</div>
+      </div>
+    </div>`;
+}
+
+// ═══════════════════════════════════════════════════════════
+// RAG SEARCH
+// ═══════════════════════════════════════════════════════════
+function setSearch(q){document.getElementById('searchInp').value=q;runRAG()}
+
+async function runRAG(){
+  const q=document.getElementById('searchInp').value.trim();
+  if(!q){document.getElementById('searchInp').focus();return}
+  view='rag';
+  clearInterval(timerID);
+  setActiveNav('');
+  document.getElementById('topbarTitle').textContent='AI Study Assistant';
+  document.getElementById('topbarSub').textContent='';
+
+  const btn=document.getElementById('genBtn');
+  btn.disabled=true;
+  btn.innerHTML='<div style="width:13px;height:13px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite"></div> Generating…';
+
+  document.getElementById('content').innerHTML=`
+    <div class="loading-wrap">
+      <div class="view-hdr"><h1>Generating Study Content</h1><p>Query: <em>"${q}"</em></p></div>
+      <div class="ls" id="ls1"><div class="ls-spinner"></div><div><div class="ls-text">Searching textbook knowledge base</div><div class="ls-sub">TF-IDF retrieval · BScN Paper I, II & IV</div></div></div>
+      <div class="ls" id="ls2"><div class="ls-spinner"></div><div><div class="ls-text">Generating alternative questions</div><div class="ls-sub">Claude AI · grounded in textbook evidence</div></div></div>
+      <div class="ls" id="ls3"><div class="ls-spinner"></div><div><div class="ls-text">Structuring response</div><div class="ls-sub">Parsing answers, explanations, concepts…</div></div></div>
+    </div>`;
+
+  await delay(350);
+  const evidence=retrieve(q,5);
+  done('ls1');
+
+  let ai;
+  try{ai=await callAI(q,evidence.length?evidence:KB.slice(0,3));done('ls2')}
+  catch(e){
+    ai={
+      concept_summary:`"${q}" is a nursing concept. Review the textbook evidence below for grounded information.`,
+      key_facts:evidence.length?[evidence[0].txt.substring(0,150)+'…']:['See textbook evidence below'],
+      alternative_questions:[
+        {q:`Define and explain "${q}" in nursing practice.`,type:'recall',difficulty:'easy',answer:'See textbook evidence above',explanation:'Based on BScN textbook content'},
+        {q:`A nurse encounters a patient with "${q}". What is the PRIORITY nursing intervention?`,type:'application',difficulty:'medium',answer:'Assessment and appropriate intervention per protocol',explanation:'Apply textbook principles'},
+        {q:`Which of the following statements about "${q}" is CORRECT?\nA. Statement A  B. Statement B  C. Statement C  D. Statement D`,type:'MCQ',difficulty:'medium',answer:'Refer to retrieved textbook evidence',explanation:'Review the evidence panel below'}
+      ],
+      related_concepts:['Nursing Process','Patient Assessment','Clinical Documentation','Evidence-Based Practice','Health Education']
+    };
+    done('ls2');
+  }
+  await delay(300);done('ls3');await delay(250);
+
+  renderRAGResults(q,evidence,ai);
+  btn.disabled=false;
+  btn.innerHTML='Generate ↗';
+}
+
+function done(id){
+  const el=document.getElementById(id);
+  if(el){el.classList.add('done');const s=el.querySelector('.ls-spinner');if(s)s.outerHTML='<span class="ls-ico">✓</span>'}
+}
+
+function renderRAGResults(q,ev,ai){
+  const letters=['A','B','C','D'];
+  const dc=d=>d==='easy'?'diff-easy':d==='hard'?'diff-hard':'diff-medium';
+
+  const qCards=(ai.alternative_questions||[]).map((aq,i)=>`
+    <div class="alt-q" id="aq${i}">
+      <div class="alt-q-head" onclick="toggleAQ(${i})">
+        <span class="alt-q-num">Q${i+1}</span>
+        <div style="flex:1">
+          <div class="alt-q-meta">
+            <span class="diff-badge ${dc(aq.difficulty)}">${aq.difficulty.toUpperCase()}</span>
+            <span class="type-badge">${aq.type}</span>
+          </div>
+          <div class="alt-q-text">${aq.q}</div>
+        </div>
+        <span class="alt-expand">▾</span>
+      </div>
+      <div class="alt-q-body">
+        <div class="alt-answer">
+          <div class="alt-ans-lbl">Answer</div>
+          <div class="alt-ans-txt">${aq.answer}</div>
+          ${aq.explanation?`<div class="alt-ans-exp">${aq.explanation}</div>`:''}
+        </div>
+        <div class="try-btn" onclick="setSearch('${aq.q.replace(/'/g,"\\'").substring(0,70)}')">↗ Generate more on this</div>
+      </div>
+    </div>`).join('');
+
+  const evCards=ev.map(e=>`
+    <div class="ev-item">
+      <div class="ev-meta">
+        <span class="ev-src">${e.src}</span>
+        <span class="ev-sec" title="${e.sec}">${e.sec.substring(0,38)}${e.sec.length>38?'…':''}</span>
+        <span class="ev-score"><em>${Math.round(e.score*100)}%</em> match</span>
+      </div>
+      <div class="ev-quote">${e.txt.substring(0,260)}${e.txt.length>260?'…':''}</div>
+    </div>`).join('');
+
+  const relChips=(ai.related_concepts||[]).map(c=>`<div class="rel-chip" onclick="setSearch('${c}')">${c}</div>`).join('');
+
+  const jsonData={query:q,retrieved_sources:ev.length,concept_summary:ai.concept_summary,alternative_questions:(ai.alternative_questions||[]).map(x=>({question:x.q,type:x.type,difficulty:x.difficulty,answer:x.answer})),related_concepts:ai.related_concepts};
+  const jsonStr=JSON.stringify(jsonData,null,2).replace(/"(\w+)":/g,'<span style="color:#7fa4ff">"$1":</span>').replace(/: "([^"]+)"/g,': <span style="color:#a8d8a8">"$1"</span>').replace(/: (\d+\.?\d*)/g,': <span style="color:#f5a623">$1</span>');
+
+  document.getElementById('content').innerHTML=`
+    <div class="view-hdr">
+      <h1>Study Content: <span style="color:var(--acc2)">${q}</span></h1>
+      <p>${ev.length} textbook source${ev.length!==1?'s':''} retrieved · ${(ai.alternative_questions||[]).length} questions generated</p>
+    </div>
+
+    <div class="rag-panel">
+      <div class="panel-hdr"><div class="panel-ico" style="background:var(--acc-d)">🧠</div><span class="panel-title">Concept Understanding</span><span class="panel-badge">Step 1 of 4</span></div>
+      <div class="panel-body">
+        <div class="concept-box">${ai.concept_summary||'Analysis based on retrieved textbook content.'}</div>
+        ${(ai.key_facts||[]).length?`<div class="facts-lbl">Key facts from textbooks</div>${(ai.key_facts||[]).map(f=>`<div class="fact-row"><div class="fact-dot"></div><span>${f}</span></div>`).join('')}`:''}
+      </div>
+    </div>
+
+    <div class="rag-panel">
+      <div class="panel-hdr"><div class="panel-ico" style="background:var(--grn-d)">❓</div><span class="panel-title">Alternative Exam Questions</span><span class="panel-badge">${(ai.alternative_questions||[]).length} generated</span></div>
+      <div class="panel-body" style="padding:14px">${qCards}</div>
+    </div>
+
+    <div class="rag-panel">
+      <div class="panel-hdr"><div class="panel-ico" style="background:var(--amb-d)">📖</div><span class="panel-title">Textbook Evidence</span><span class="panel-badge">${ev.length} source${ev.length!==1?'s':''}</span></div>
+      <div class="panel-body">${evCards||'<p style="font-size:13px;color:var(--txt3)">No matching textbook sections found. Try rephrasing.</p>'}</div>
+    </div>
+
+    <div class="rag-panel">
+      <div class="panel-hdr"><div class="panel-ico" style="background:var(--pur-d)">🔗</div><span class="panel-title">Related Concepts to Revise</span><span class="panel-badge">Step 4 of 4</span></div>
+      <div class="panel-body"><div class="rel-wrap">${relChips}</div></div>
+    </div>
+
+    <div class="rag-panel">
+      <div class="panel-hdr"><div class="panel-ico" style="background:var(--s3)">{}</div><span class="panel-title">API Response (JSON)</span><span class="panel-badge">Developer</span></div>
+      <div class="panel-body">
+        <div class="json-toggle" onclick="this.nextElementSibling.classList.toggle('open');this.textContent=this.nextElementSibling.classList.contains('open')?'▲ Hide JSON':'▾ View JSON response'">▾ View JSON response</div>
+        <div class="json-box">${jsonStr}</div>
+      </div>
+    </div>`;
+}
+
+function toggleAQ(i){document.getElementById('aq'+i).classList.toggle('open')}
+
+// ═══════════════════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════════════════
+function shuffle(a){return a.sort(()=>Math.random()-.5)}
+function delay(ms){return new Promise(r=>setTimeout(r,ms))}
+function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('overlay').classList.toggle('open')}
+function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('overlay').classList.remove('open')}
+
+// keyboard
+document.addEventListener('keydown',e=>{
+  if((e.metaKey||e.ctrlKey)&&e.key==='k'){e.preventDefault();document.getElementById('searchInp').focus()}
+  if(e.key==='Escape'){document.getElementById('searchInp').blur();closeSidebar()}
+});
+document.getElementById('searchInp').addEventListener('keydown',e=>{if(e.key==='Enter')runRAG()});
+
+// ═══════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════
+buildNav();
+showHome();
+</script>
+</body>
+</html>
