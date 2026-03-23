@@ -1,18 +1,46 @@
-
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>NCK AI App</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>👑 Lord Tionyy NCK Revision</title>
+    <link rel="manifest" href="/manifest.json">
+    <script defer src="/_vercel/insights/script.js"></script>
+    <script defer src="/_vercel/speed-insights/script.js"></script>
 </head>
 <body>
 
-<h1>NCK AI Revision App</h1>
+<h1>NCK Revision Tool (Enhanced)</h1>
 
-<button onclick="setCurrentQuestion('What is preeclampsia?')">Load Question</button>
-<button onclick="generateSimilar()">Generate AI Question</button>
-<button onclick="getEvidence()">Get Evidence</button>
+<button onclick="toggleMockMode()">Toggle Mock Mode</button>
 
-<script src="app.js"></script>
+<script>
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js');
+    });
+}
+
+let isMockMode = false;
+
+function toggleMockMode() {
+    isMockMode = !isMockMode;
+    alert(isMockMode ? "Mock Mode ON" : "Study Mode ON");
+}
+
+async function reportError(qId) {
+    const feedback = prompt("What's wrong?");
+    if (!feedback) return;
+
+    await fetch('/api/report', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ qId, feedback })
+    });
+
+    alert("Reported successfully!");
+}
+</script>
 
 </body>
 </html>
